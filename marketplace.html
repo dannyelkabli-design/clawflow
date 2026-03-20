@@ -160,6 +160,28 @@
   .config-banner p { font-size: 13px; color: var(--muted2); line-height: 1.6; }
   .config-banner code { background: var(--surface3); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--text); }
 
+  /* PRICING TIERS */
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 28px 0; }
+  .pricing-tier { border: 1px solid var(--border2); border-radius: 14px; padding: 28px 24px; cursor: pointer; transition: all .2s; position: relative; background: var(--surface2); }
+  .pricing-tier:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .pricing-tier.recommended { border-color: var(--accent); background: linear-gradient(135deg, rgba(232,80,30,0.06) 0%, var(--surface2) 60%); }
+  .pricing-tier-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 12px; border-radius: 100px; white-space: nowrap; }
+  .pricing-tier-name { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted2); margin-bottom: 12px; }
+  .pricing-price { font-family: 'DM Serif Display', serif; font-size: 40px; font-weight: 400; line-height: 1; margin-bottom: 4px; }
+  .pricing-price span { font-size: 16px; color: var(--muted); font-family: 'DM Sans', sans-serif; }
+  .pricing-desc { font-size: 13px; color: var(--muted2); line-height: 1.6; margin: 12px 0 16px; }
+  .pricing-feats { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .pricing-feats li { font-size: 13px; color: var(--muted2); display: flex; align-items: flex-start; gap: 8px; }
+  .pricing-feats li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+  .pricing-feats li.muted-feat { color: var(--muted); }
+  .pricing-feats li.muted-feat::before { content: '—'; color: var(--muted); }
+  .pricing-cta { width: 100%; margin-top: 20px; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; border: 1px solid var(--border2); background: transparent; color: var(--text); }
+  .pricing-cta:hover { border-color: var(--accent); color: var(--accent); }
+  .pricing-cta.primary-cta { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pricing-cta.primary-cta:hover { background: #FF6B3D; }
+  .stripe-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 16px; }
+  .stripe-note a { color: var(--accent); text-decoration: none; }
+
   /* MODAL */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .modal-overlay.open { opacity: 1; pointer-events: all; }
@@ -283,7 +305,7 @@
       </button>
     </div>
     <div class="tab-actions">
-      <button class="btn-add-outline" id="btn-post-opdracht" style="display:none" onclick="openModal('opdracht')">+ Opdracht plaatsen</button>
+      <button class="btn-add-outline" id="btn-post-opdracht" style="display:none" onclick="openPricingModal()">+ Opdracht plaatsen</button>
       <button class="btn-add" id="btn-add-consultant" onclick="openModal('consultant')">+ Meld je aan</button>
     </div>
   </div>
@@ -399,6 +421,48 @@
   </div>
 </div>
 
+<!-- MODAL: PRICING -->
+<div class="modal-overlay" id="modal-pricing">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-top-bar"></div>
+    <button class="modal-close" onclick="closeModal('pricing')">✕</button>
+    <h2>Kies uw advertentieformaat</h2>
+    <p class="modal-sub">Bereik gecertificeerde AI automation specialists direct in hun marketplace feed.</p>
+    <div class="pricing-grid">
+      <div class="pricing-tier">
+        <div class="pricing-tier-name">Basis</div>
+        <div class="pricing-price">Gratis<span></span></div>
+        <div class="pricing-desc">Standaard vermelding in de opdrachtenlijst.</div>
+        <ul class="pricing-feats">
+          <li>Zichtbaar in de opdrachtenlijst</li>
+          <li>Standaard sortering</li>
+          <li>Alle filtercategorieën</li>
+          <li class="muted-feat">Geen uitgelicht-badge</li>
+          <li class="muted-feat">Geen prioriteit in feed</li>
+          <li class="muted-feat">Geen e-mail notificatie naar consultants</li>
+        </ul>
+        <button class="pricing-cta" onclick="chooseTier('basis')">Gratis plaatsen</button>
+      </div>
+      <div class="pricing-tier recommended">
+        <div class="pricing-tier-badge">⭐ Aanbevolen</div>
+        <div class="pricing-tier-name">Uitgelicht</div>
+        <div class="pricing-price">€ 149<span>/plaatsing</span></div>
+        <div class="pricing-desc">Maximale zichtbaarheid en directe bereik onder specialisten.</div>
+        <ul class="pricing-feats">
+          <li>Bovenaan de opdrachtenlijst</li>
+          <li>★ Uitgelicht-badge op uw kaart</li>
+          <li>Oranje highlight rand</li>
+          <li>E-mail notificatie naar alle passende consultants</li>
+          <li>30 dagen actief (vs. standaard)</li>
+          <li>Prioriteit in zoekresultaten</li>
+        </ul>
+        <button class="pricing-cta primary-cta" onclick="chooseTier('uitgelicht')">Uitgelicht plaatsen →</button>
+      </div>
+    </div>
+    <p class="stripe-note">Veilige betaling via <a href="https://stripe.com" target="_blank">Stripe</a> · Geen abonnement · Eenmalige betaling · Factuur beschikbaar</p>
+  </div>
+</div>
+
 <!-- MODAL: OPDRACHT -->
 <div class="modal-overlay" id="modal-opdracht">
   <div class="modal">
@@ -447,6 +511,7 @@
 // ── CONFIG — VUL DIT IN ────────────────────────────────────────────────────────
 const SUPABASE_URL      = 'JOUW_SUPABASE_URL';       // bijv. https://abcdefgh.supabase.co
 const SUPABASE_ANON_KEY = 'JOUW_SUPABASE_ANON_KEY';  // uit Supabase → Settings → API
+const STRIPE_PAYMENT_LINK = 'JOUW_STRIPE_PAYMENT_LINK'; // bijv. https://buy.stripe.com/xxx
 // ─────────────────────────────────────────────────────────────────────────────
 
 const configured = !SUPABASE_URL.startsWith('JOUW');
@@ -660,6 +725,45 @@ function switchTab(tab) {
   document.getElementById('btn-post-opdracht').style.display  = tab === 'opdrachten'  ? 'flex' : 'none';
 }
 
+// ── PRICING / BETAALD ─────────────────────────────────────────────────────────
+let selectedTier = 'basis';
+
+function openPricingModal() {
+  // Check if returned from Stripe payment with success param
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('betaald') === 'true') {
+    selectedTier = 'uitgelicht';
+    openModal('opdracht');
+    // Update featured label in form header
+    document.querySelector('#modal-opdracht h2').textContent = '★ Uitgelicht opdracht plaatsen';
+    // Clean URL
+    history.replaceState({}, '', window.location.pathname);
+    return;
+  }
+  openModal('pricing');
+}
+
+function chooseTier(tier) {
+  selectedTier = tier;
+  closeModal('pricing');
+
+  if (tier === 'uitgelicht') {
+    if (STRIPE_PAYMENT_LINK.startsWith('JOUW')) {
+      // Stripe not yet configured — show form anyway with featured flag for demo
+      alert('Stripe is nog niet geconfigureerd. Voor demo: opdracht wordt als uitgelicht geplaatst.');
+      openModal('opdracht');
+      document.querySelector('#modal-opdracht h2').textContent = '★ Uitgelicht opdracht plaatsen';
+    } else {
+      // Redirect to Stripe, return URL with ?betaald=true
+      const returnUrl = encodeURIComponent(window.location.href.split('?')[0] + '?betaald=true');
+      window.location.href = STRIPE_PAYMENT_LINK + '?success_url=' + returnUrl;
+    }
+  } else {
+    openModal('opdracht');
+    document.querySelector('#modal-opdracht h2').textContent = 'Opdracht plaatsen';
+  }
+}
+
 // ── MODALS ─────────────────────────────────────────────────────────────────────
 function openModal(t)  { document.getElementById('modal-'+t).classList.add('open');    document.body.style.overflow = 'hidden'; }
 function closeModal(t) { document.getElementById('modal-'+t).classList.remove('open'); document.body.style.overflow = ''; }
@@ -726,7 +830,7 @@ async function submitOpdracht() {
     budget:   document.getElementById('oi-budget').value.trim() || null,
     looptijd: document.getElementById('oi-looptijd').value,
     tags,
-    featured: false
+    featured: selectedTier === 'uitgelicht'
   };
 
   setLoading('submit-o', true);
