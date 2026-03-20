@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -512,9 +513,38 @@
 const SUPABASE_URL      = 'https://yiwchcshynwaletuepom.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_FzORD6CilxPNFK-HYMclvg_uO7k_uLV';
 const STRIPE_PAYMENT_LINK = 'JOUW_STRIPE_PAYMENT_LINK'; // bijv. https://buy.stripe.com/xxx
+
+// ── EMAILJS — VUL DIT IN ──────────────────────────────────────────────────────
+const EMAILJS_PUBLIC_KEY       = 'JOUW_EMAILJS_PUBLIC_KEY';   // EmailJS → Account → Public Key
+const EMAILJS_SERVICE_ID       = 'JOUW_SERVICE_ID';           // EmailJS → Email Services
+const EMAILJS_TEMPLATE_CONSULT = 'JOUW_TEMPLATE_CONSULTANT';  // EmailJS → Email Templates
+const EMAILJS_TEMPLATE_OPDRACHT = 'JOUW_TEMPLATE_OPDRACHT';   // EmailJS → Email Templates
+const NOTIFICATIE_EMAIL        = 'JOUW_EMAIL@EMAIL.COM';      // jouw e-mailadres voor notificaties
 // ─────────────────────────────────────────────────────────────────────────────
 
-const configured = !SUPABASE_URL.startsWith('JOUW');
+const configured   = !SUPABASE_URL.startsWith('JOUW');
+const emailEnabled = !EMAILJS_PUBLIC_KEY.startsWith('JOUW');
+
+if (emailEnabled) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+async function sendNotification(type, data) {
+  if (!emailEnabled) return;
+  const templates = { consultant: EMAILJS_TEMPLATE_CONSULT, opdracht: EMAILJS_TEMPLATE_OPDRACHT };
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, templates[type], {
+      to_email:   NOTIFICATIE_EMAIL,
+      type:       type === 'consultant' ? 'Nieuw consultant profiel' : 'Nieuwe opdracht geplaatst',
+      naam:       data.naam,
+      email:      data.email || '—',
+      organisatie: data.bedrijf || data.rol || '—',
+      details:    type === 'consultant'
+        ? `Rol: ${data.rol}\nLocatie: ${data.locatie||'—'}\nTarief: €${data.tarief}/dag\nBeschikbaar: ${data.beschikbaar}\nExpertise: ${(data.tags||[]).join(', ')}\n\nBio:\n${data.bio}`
+        : `Bedrijf: ${data.bedrijf}\nSector: ${data.sector}\nBudget: ${data.budget||'—'}\nLooptijd: ${data.looptijd}\nUitgelicht: ${data.featured?'Ja (betaald)':'Nee'}\nPlatformen: ${(data.tags||[]).join(', ')}\n\nOmschrijving:\n${data.beschrijving}`,
+    });
+  } catch (err) {
+    console.warn('E-mail kon niet worden verstuurd:', err);
+  }
+}
 const db = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 if (!configured) {
@@ -804,6 +834,7 @@ async function submitConsultant() {
   closeModal('consultant');
   resetForm(['ci-naam','ci-rol','ci-email','ci-locatie','ci-bio','ci-tarief']);
   showToast('Profiel ingediend! Je staat nu in de marketplace.');
+  sendNotification('consultant', record);
   switchTab('consultants');
 }
 
@@ -841,6 +872,7 @@ async function submitOpdracht() {
   closeModal('opdracht');
   resetForm(['oi-bedrijf','oi-naam','oi-titel','oi-desc','oi-budget','oi-email']);
   showToast('Opdracht geplaatst! Consultants kunnen nu reageren.');
+  sendNotification('opdracht', record);
   switchTab('opdrachten');
 }
 
