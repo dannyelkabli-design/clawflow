@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM's inzetten in bedrijfsprocessen: mogelijkheden, beperkingen en veiligheid — Nemoclaw</title>
+<meta name="description" content="Wanneer voeg je een taalmodel toe aan een workflow, en wanneer is een deterministisch systeem beter? Eerlijk antwoord.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0A0C12; --surface: #0F1220; --surface2: #141828; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13); --text: #F0F4FA; --muted: #6B7A99; --muted2: #9AA4B8; --accent: #E8501E; --purple: #7B3FC4; --logo-gradient: linear-gradient(135deg, #7B3FC4, #E8501E); }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; background: rgba(10,12,18,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo { text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .nav-logo-icon { width: 32px; height: 32px; background: var(--logo-gradient); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-icon svg { width: 18px; height: 18px; }
+  .nav-logo-text { display: flex; flex-direction: column; gap: 1px; }
+  .nav-logo-primary { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  .nav-logo-secondary { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted2); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; }
+  .nav-cta:hover { background: #FF6B3D; }
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+  .mobile-nav { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+  .mobile-nav.open { display: flex; }
+  .mobile-nav a { color: var(--text); text-decoration: none; font-size: 24px; font-weight: 500; }
+  .mobile-nav-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: var(--text); font-size: 28px; cursor: pointer; }
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 100px 48px 80px; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--muted2); text-decoration: none; font-size: 14px; margin-bottom: 40px; transition: color .2s; }
+  .back-link:hover { color: var(--text); }
+  .back-link svg { width: 16px; height: 16px; }
+  .article-category { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .article-title { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 4vw, 50px); line-height: 1.1; font-weight: 400; margin-bottom: 24px; }
+  .article-meta { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .article-meta img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .meta-name { color: var(--text); font-weight: 500; font-size: 14px; }
+  .meta-sub { font-size: 13px; color: var(--muted); }
+  .article-cover { width: 100%; height: 400px; object-fit: cover; border-radius: 16px; margin-bottom: 48px; }
+  .article-body { font-size: 17px; line-height: 1.8; color: #D0D8EC; }
+  .article-body p { margin-bottom: 24px; }
+  .article-body h2 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin: 48px 0 20px; line-height: 1.2; }
+  .article-body h3 { font-size: 18px; font-weight: 600; color: var(--text); margin: 32px 0 14px; }
+  .article-body ul, .article-body ol { padding-left: 24px; margin-bottom: 24px; }
+  .article-body li { margin-bottom: 10px; }
+  .article-body strong { color: var(--text); font-weight: 600; }
+  .callout { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 10px; padding: 24px 28px; margin: 32px 0; }
+  .callout p { margin: 0; font-size: 16px; color: var(--muted2); }
+  .callout.warning { border-left-color: #F59E0B; }
+  .callout strong { color: var(--text); }
+  .use-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+  .use-case-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .use-case-card.good { border-top: 3px solid #22C55E; }
+  .use-case-card.bad { border-top: 3px solid #EF4444; }
+  .uc-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+  .use-case-card.good .uc-label { color: #22C55E; }
+  .use-case-card.bad .uc-label { color: #EF4444; }
+  .use-case-card ul { list-style: none; padding: 0; }
+  .use-case-card li { font-size: 14px; color: var(--muted2); padding: 5px 0; display: flex; gap: 8px; }
+  .use-case-card.good li::before { content: '✓'; color: #22C55E; font-weight: 600; }
+  .use-case-card.bad li::before { content: '✗'; color: #EF4444; font-weight: 600; }
+  .article-cta { background: linear-gradient(135deg, rgba(123,63,196,0.12), rgba(232,80,30,0.08)); border: 1px solid rgba(123,63,196,0.25); border-radius: 16px; padding: 48px; text-align: center; margin-top: 64px; }
+  .article-cta h3 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; margin-bottom: 12px; }
+  .article-cta p { color: var(--muted2); margin-bottom: 28px; }
+  .btn-primary { display: inline-block; background: var(--accent); color: #fff; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all .2s; }
+  .btn-primary:hover { background: #FF6B3D; transform: translateY(-1px); }
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; } .nav-links, .nav-cta { display: none; } .hamburger { display: flex; }
+    .article-wrap { padding: 90px 20px 60px; } .use-cases { grid-template-columns: 1fr; }
+    .article-cover { height: 220px; } footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7 22 17 12 22 2 17 2 7"/><polyline points="12 22 12 12"/><polyline points="22 7 12 12"/><polyline points="2 7 12 12"/></svg></div>
+    <div class="nav-logo-text"><span class="nav-logo-primary">NEMOCLAW</span><span class="nav-logo-secondary">CONSULTANTS</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="marketplace.html">Marketplace</a></li><li><a href="pricing.html">Prijzen</a></li><li><a href="blog.html" style="color:var(--accent)">Kennisbank</a></li>
+  </ul>
+  <a href="index.html#contact" class="nav-cta">Gesprek Plannen</a>
+  <button class="hamburger" onclick="document.querySelector('.mobile-nav').classList.add('open')"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav">
+  <button class="mobile-nav-close" onclick="document.querySelector('.mobile-nav').classList.remove('open')">&times;</button>
+  <a href="index.html">Home</a><a href="marketplace.html">Marketplace</a><a href="pricing.html">Prijzen</a><a href="blog.html">Kennisbank</a><a href="index.html#contact" style="color:var(--accent)">Gesprek Plannen</a>
+</div>
+
+<div class="article-wrap">
+  <a href="blog.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Terug naar Kennisbank
+  </a>
+
+  <div class="article-category">Techniek</div>
+  <h1 class="article-title">LLM's inzetten in bedrijfsprocessen: mogelijkheden, beperkingen en veiligheid</h1>
+
+  <div class="article-meta">
+    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=faces&auto=format" alt="Thomas Brouwer">
+    <div>
+      <div class="meta-name">Thomas Brouwer</div>
+      <div class="meta-sub">17 februari 2026 &nbsp;·&nbsp; 12 min lezen</div>
+    </div>
+  </div>
+
+  <img class="article-cover" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop" alt="LLM AI bedrijfsprocessen">
+
+  <div class="article-body">
+    <p>Large Language Models zijn overal. De druk vanuit management om "iets met AI te doen" is groot, en LLMs voelen als de meest zichtbare uiting van die AI-revolutie. Maar als automation-architect zie ik ook de nadelen van ongenuanceerde inzet: foutieve uitkomsten in kritieke processen, databeveiligingsproblemen, en enorme rekeningen bij cloudproviders. Dit artikel geeft een eerlijk beeld van wanneer LLMs waarde toevoegen — en wanneer niet.</p>
+
+    <div class="callout">
+      <p><strong>Kernboodschap:</strong> Een LLM is geen vervanging voor een deterministisch algoritme. Het is een aanvulling voor taken waar taal, context, en nuance vereist zijn. Gebruik de juiste tool voor de juiste taak.</p>
+    </div>
+
+    <h2>Wat LLMs goed kunnen — en wat niet</h2>
+
+    <div class="use-cases">
+      <div class="use-case-card good">
+        <div class="uc-label">Geschikt voor LLM</div>
+        <ul>
+          <li>Samenvatten van lange teksten of documenten</li>
+          <li>Classificeren van ongestructureerde tekst (e-mails, klachten)</li>
+          <li>Extractie van entiteiten uit vrije tekst</li>
+          <li>Genereren van eerste concepten (brieven, rapporten)</li>
+          <li>Vertalen en herschrijven van tekst</li>
+          <li>Beantwoorden van veelgestelde vragen via FAQ-bot</li>
+          <li>Sentiment-analyse van klantteksten</li>
+        </ul>
+      </div>
+      <div class="use-case-card bad">
+        <div class="uc-label">Niet geschikt voor LLM</div>
+        <ul>
+          <li>Precieze berekeningen (gebruik een calculator)</li>
+          <li>Realtime datums, koersen, live informatie</li>
+          <li>Juridisch bindende beslissingen zonder menselijke controle</li>
+          <li>Taken waar 100% consistentie vereist is</li>
+          <li>Verwerking van gevoelige persoonsgegevens via publieke API</li>
+          <li>Hoge-volume transactieverwerking (te duur, te traag)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>De drie meest waardevolle toepassingen in de praktijk</h2>
+
+    <h3>1. E-mail triage en classificatie</h3>
+    <p>Een van de meest effectieve toepassingen die wij implementeren: automatische classificatie van inkomende e-mails. Een LLM leest de e-mail en bepaalt de categorie (klacht, vraag, bestelling, escalatie), de urgentie, en de verantwoordelijke afdeling. Bij Coolblue verwerken we zo 5.000+ mails per dag — zonder dat een medewerker de volledige mail hoeft te lezen voor de routeringsbeslissing.</p>
+    <p>Belangrijk: het LLM beslist niet over de afhandeling. Het bepaalt alleen de routing. Een medewerker handelt de daadwerkelijke mail nog steeds af, maar dan wel de juiste persoon, direct.</p>
+
+    <h3>2. Documentextractie uit ongestructureerde bronnen</h3>
+    <p>Contracten, facturen, vergunningsaanvragen — veel documenttypen hebben een vaste structuur maar worden aangeleverd in vrije tekst. Een LLM kan betrouwbaar specifieke velden extraheren (bedragen, datums, namen, referentienummers) die vervolgens worden doorgezet naar gestructureerde systemen.</p>
+    <p>De kracht: het werkt ook voor documenten die afwijken van de standaard template — iets waar traditionele OCR-modellen moeite mee hebben.</p>
+
+    <h3>3. Eerste-concept generatie voor communicatie</h3>
+    <p>Medewerkers die tientallen klantbrieven per dag schrijven, besteden veel tijd aan tekst die sterk op elkaar lijkt. Een LLM kan op basis van de zaakdetails een eerste concept genereren dat de medewerker nog controleert en aanpast. Dit halveert de schrijftijd zonder de menselijke kwaliteitscontrole te verwijderen.</p>
+
+    <h2>De echte gevaren: wat je moet weten</h2>
+
+    <h3>Hallucinaties en de gevolgen in bedrijfsprocessen</h3>
+    <p>LLMs kunnen zelfverzekerd foutieve informatie presenteren — dit wordt "hallucineren" genoemd. In een conversatiechbot is dit vervelend. In een financieel of juridisch bedrijfsproces kan het catastrofaal zijn. Stel dat een LLM een factuurbedrag verkeerd extraheert en dat bedrag wordt direct doorgeboekt zonder controle.</p>
+    <p>De oplossing: gebruik LLMs nooit als eindpunt van een kritiek proces. Bouw altijd een validatiestap in, hetzij geautomatiseerd (schema-validatie, rangecontrole) hetzij menselijk (uitzondering bij lage confidence-score).</p>
+
+    <h3>Dataprivacy bij cloudgebaseerde LLMs</h3>
+    <p>Als je een LLM-API van een externe provider (OpenAI, Anthropic, Google) aanroept met bedrijfsdata, verlaat die data jouw omgeving. Dit is een serieus AVG-risico als de data persoonsgegevens bevat. Mogelijke oplossingen:</p>
+    <ul>
+      <li><strong>Dataminimalisatie</strong> — stuur alleen de strikt noodzakelijke velden naar het model</li>
+      <li><strong>Pseudonimisering</strong> — vervang namen en nummers door tokens voor API-aanroep, zet na ontvangst terug</li>
+      <li><strong>On-premise modellen</strong> — open-source modellen (Llama, Mistral) kunnen lokaal draaien</li>
+      <li><strong>Enterprise API's met DPA</strong> — gebruik enterprise-contracten met verwerkerovereenkomst</li>
+    </ul>
+
+    <div class="callout warning">
+      <p><strong>Let op:</strong> De gratis en standaard betaalde tiers van de meeste LLM-providers gebruiken jouw data standaard voor modeltraining. Dit is niet acceptabel voor bedrijfsdata. Gebruik altijd enterprise-tier of verifieer het databeleid expliciet.</p>
+    </div>
+
+    <h3>Kosten bij hoog volume</h3>
+    <p>LLM-API's rekenen per token. Bij lage volumes (honderden aanroepen per dag) zijn de kosten verwaarloosbaar. Bij hoge volumes (tienduizenden aanroepen per dag) kunnen de kosten snel oplopen naar honderden euro's per maand. Bereken de kosten van tevoren op basis van het verwachte volume en vergelijk dat met de waarde die het oplevert.</p>
+
+    <h2>Het beslismodel: LLM of deterministisch?</h2>
+    <p>Stel jezelf deze vragen:</p>
+    <ol>
+      <li>Is de input gestructureerd en voorspelbaar? → Gebruik regelgebaseerde logica</li>
+      <li>Is 100% nauwkeurigheid vereist zonder menselijke fallback? → Gebruik een deterministisch systeem</li>
+      <li>Bevat de input vrije tekst, nuance of context? → LLM kan waarde toevoegen</li>
+      <li>Is er een menselijke controle-laag aanwezig voor de output? → LLM is verantwoord in te zetten</li>
+    </ol>
+
+    <p>In de praktijk is het antwoord vaak: een combinatie. Deterministische stappen voor gestructureerde verwerking, LLM alleen voor de taalcomponent, en menselijke validatie voor kritieke beslissingen. Dat is geen compromis — dat is de juiste architectuur.</p>
+
+    <div class="callout">
+      <p><strong>Mijn advies:</strong> Begin met een pilot op een niet-kritisch process. Meet de nauwkeurigheid, de kosten, en de gebruikerstevredenheid. Schaal pas op als je data hebt. En wees eerlijk over de beperkingen — zowel intern als naar je klanten.</p>
+    </div>
+  </div>
+
+  <div class="article-cta">
+    <h3>Wil je AI zinvol inzetten in jouw processen?</h3>
+    <p>Onze AI-architecten helpen je de juiste keuze te maken — zonder hype, met feiten.</p>
+    <a href="index.html#contact" class="btn-primary">AI Adviesgesprek</a>
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 Nemoclaw Consultants</span>
+  <div style="display:flex;gap:24px"><a href="blog.html">Kennisbank</a><a href="index.html#contact">Contact</a></div>
+</footer>
+</body>
+</html>

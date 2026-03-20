@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webhooks, REST of event-driven? De juiste integratiearchitectuur voor jouw workflow — Nemoclaw</title>
+<meta name="description" content="Wanneer kies je voor polling vs. webhooks, en wanneer is een message broker de betere keuze? Met praktijkvoorbeelden.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0A0C12; --surface: #0F1220; --surface2: #141828; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13); --text: #F0F4FA; --muted: #6B7A99; --muted2: #9AA4B8; --accent: #E8501E; --purple: #7B3FC4; --logo-gradient: linear-gradient(135deg, #7B3FC4, #E8501E); }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; background: rgba(10,12,18,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo { text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .nav-logo-icon { width: 32px; height: 32px; background: var(--logo-gradient); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-icon svg { width: 18px; height: 18px; }
+  .nav-logo-text { display: flex; flex-direction: column; gap: 1px; }
+  .nav-logo-primary { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  .nav-logo-secondary { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted2); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; }
+  .nav-cta:hover { background: #FF6B3D; }
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+  .mobile-nav { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+  .mobile-nav.open { display: flex; }
+  .mobile-nav a { color: var(--text); text-decoration: none; font-size: 24px; font-weight: 500; }
+  .mobile-nav-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: var(--text); font-size: 28px; cursor: pointer; }
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 100px 48px 80px; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--muted2); text-decoration: none; font-size: 14px; margin-bottom: 40px; transition: color .2s; }
+  .back-link:hover { color: var(--text); }
+  .back-link svg { width: 16px; height: 16px; }
+  .article-category { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .article-title { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 4vw, 50px); line-height: 1.1; font-weight: 400; margin-bottom: 24px; }
+  .article-meta { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .article-meta img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .meta-name { color: var(--text); font-weight: 500; font-size: 14px; }
+  .meta-sub { font-size: 13px; color: var(--muted); }
+  .article-cover { width: 100%; height: 400px; object-fit: cover; border-radius: 16px; margin-bottom: 48px; }
+  .article-body { font-size: 17px; line-height: 1.8; color: #D0D8EC; }
+  .article-body p { margin-bottom: 24px; }
+  .article-body h2 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin: 48px 0 20px; line-height: 1.2; }
+  .article-body h3 { font-size: 18px; font-weight: 600; color: var(--text); margin: 32px 0 14px; }
+  .article-body ul, .article-body ol { padding-left: 24px; margin-bottom: 24px; }
+  .article-body li { margin-bottom: 10px; }
+  .article-body strong { color: var(--text); font-weight: 600; }
+  .callout { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 10px; padding: 24px 28px; margin: 32px 0; }
+  .callout p { margin: 0; font-size: 16px; color: var(--muted2); }
+  .callout strong { color: var(--text); }
+  .code-block { background: #0A0C12; border: 1px solid var(--border2); border-radius: 10px; padding: 20px 24px; font-family: 'Courier New', monospace; font-size: 14px; color: #A8D8A8; overflow-x: auto; margin: 24px 0; line-height: 1.6; }
+  .code-block .comment { color: #5A6A7A; }
+  .code-block .key { color: #87CEEB; }
+  .decision-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 32px 0; }
+  .decision-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .decision-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .decision-card h3.rest { color: #60A5FA; }
+  .decision-card h3.webhook { color: #34D399; }
+  .decision-card h3.event { color: var(--accent); }
+  .decision-card ul { list-style: none; padding: 0; }
+  .decision-card li { font-size: 13px; color: var(--muted2); padding: 4px 0; }
+  .article-cta { background: linear-gradient(135deg, rgba(123,63,196,0.12), rgba(232,80,30,0.08)); border: 1px solid rgba(123,63,196,0.25); border-radius: 16px; padding: 48px; text-align: center; margin-top: 64px; }
+  .article-cta h3 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; margin-bottom: 12px; }
+  .article-cta p { color: var(--muted2); margin-bottom: 28px; }
+  .btn-primary { display: inline-block; background: var(--accent); color: #fff; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all .2s; }
+  .btn-primary:hover { background: #FF6B3D; transform: translateY(-1px); }
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; } .nav-links, .nav-cta { display: none; } .hamburger { display: flex; }
+    .article-wrap { padding: 90px 20px 60px; } .decision-grid { grid-template-columns: 1fr; }
+    .article-cover { height: 220px; } footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7 22 17 12 22 2 17 2 7"/><polyline points="12 22 12 12"/><polyline points="22 7 12 12"/><polyline points="2 7 12 12"/></svg></div>
+    <div class="nav-logo-text"><span class="nav-logo-primary">NEMOCLAW</span><span class="nav-logo-secondary">CONSULTANTS</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="marketplace.html">Marketplace</a></li><li><a href="pricing.html">Prijzen</a></li><li><a href="blog.html" style="color:var(--accent)">Kennisbank</a></li>
+  </ul>
+  <a href="index.html#contact" class="nav-cta">Gesprek Plannen</a>
+  <button class="hamburger" onclick="document.querySelector('.mobile-nav').classList.add('open')"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav">
+  <button class="mobile-nav-close" onclick="document.querySelector('.mobile-nav').classList.remove('open')">&times;</button>
+  <a href="index.html">Home</a><a href="marketplace.html">Marketplace</a><a href="pricing.html">Prijzen</a><a href="blog.html">Kennisbank</a><a href="index.html#contact" style="color:var(--accent)">Gesprek Plannen</a>
+</div>
+
+<div class="article-wrap">
+  <a href="blog.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Terug naar Kennisbank
+  </a>
+
+  <div class="article-category">Techniek</div>
+  <h1 class="article-title">Webhooks, REST of event-driven? De juiste integratiearchitectuur voor jouw workflow</h1>
+
+  <div class="article-meta">
+    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=faces&auto=format" alt="David Karels">
+    <div>
+      <div class="meta-name">David Karels</div>
+      <div class="meta-sub">27 januari 2026 &nbsp;·&nbsp; 13 min lezen</div>
+    </div>
+  </div>
+
+  <img class="article-cover" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop" alt="API integratie architectuur">
+
+  <div class="article-body">
+    <p>Een van de meest onderschatte beslissingen bij het bouwen van automation-workflows is de keuze voor de juiste integratiestijl. Kies je verkeerd, dan bouw je iets dat aanvankelijk werkt maar later vastloopt op schaalbaarheid, foutafhandeling of onderhoudbaarheid. In dit artikel leg ik de drie meest gebruikte stijlen uit en geef ik je een beslismodel.</p>
+
+    <div class="callout">
+      <p><strong>Kort door de bocht:</strong> REST polling voor eenvoudige, niet-tijdkritische integraties. Webhooks voor realtime triggers bij externe systemen. Event-driven architectuur voor complexe, hoge-volume workflows waar betrouwbaarheid kritisch is.</p>
+    </div>
+
+    <h2>De drie integratiestijlen uitgelegd</h2>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h3 class="rest">REST Polling</h3>
+        <ul>
+          <li>Jij vraagt periodiek om data</li>
+          <li>Eenvoudig te implementeren</li>
+          <li>Altijd beschikbaar (pull)</li>
+          <li>Vertraagd (interval)</li>
+          <li>Inefficiënt bij laag volume</li>
+        </ul>
+      </div>
+      <div class="decision-card">
+        <h3 class="webhook">Webhooks</h3>
+        <ul>
+          <li>Systeem pusht bij event naar jou</li>
+          <li>Realtime verwerking mogelijk</li>
+          <li>Geen onnodige API-calls</li>
+          <li>Vereist publiek endpoint</li>
+          <li>Geen garantie op delivery</li>
+        </ul>
+      </div>
+      <div class="decision-card">
+        <h3 class="event">Event-driven</h3>
+        <ul>
+          <li>Via message broker (Kafka, RabbitMQ)</li>
+          <li>Gegarandeerde delivery</li>
+          <li>Hoge schaalbaarheid</li>
+          <li>Complexer in opzet</li>
+          <li>Hogere infrastructuurkosten</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>REST polling: wanneer en hoe</h2>
+    <p>REST polling is het meest eenvoudig: jouw automation-platform roept op gezette tijden een API aan om te kijken of er nieuwe data is. Dit is de juiste aanpak als:</p>
+    <ul>
+      <li>Het bronsysteem geen webhooks ondersteunt (veel legacy-systemen)</li>
+      <li>De latentie niet kritisch is — een vertraging van 5–15 minuten is acceptabel</li>
+      <li>Het volume laag is (minder dan een paar honderd records per uur)</li>
+    </ul>
+    <p>De grootste valkuil bij polling is inefficiëntie: als je elke minuut een API aanroept maar er maar één keer per uur iets verandert, doe je 59 onnodige calls. Plan altijd het juiste interval op basis van de werkelijke frequentie van wijzigingen.</p>
+
+    <div class="code-block">
+<span class="comment">// Voorbeeld: polling met delta-filter op timestamp</span>
+GET /api/orders?updated_after=2026-01-20T10:00:00Z
+Authorization: Bearer {token}
+
+<span class="comment">// Response</span>
+{
+  "<span class="key">orders</span>": [...],
+  "<span class="key">next_poll_after</span>": "2026-01-20T10:05:00Z"
+}
+    </div>
+
+    <h2>Webhooks: push in plaats van pull</h2>
+    <p>Webhooks draaien de relatie om: in plaats van dat jij vraagt, stuurt het bronsysteem een bericht zodra er een event plaatsvindt. Dit is de juiste keuze als:</p>
+    <ul>
+      <li>Realtime of near-realtime verwerking vereist is</li>
+      <li>Het bronsysteem webhooks ondersteunt (Stripe, GitHub, Shopify, etc.)</li>
+      <li>Het volume hoogfrequent is maar onregelmatig verdeeld</li>
+    </ul>
+
+    <h3>De kritieke zwakte van webhooks: geen delivery-garantie</h3>
+    <p>Webhooks zijn "fire and forget". Als jouw endpoint tijdelijk offline is wanneer het event plaatsvindt, mis je het bericht. De meeste webhook-aanbieders bieden retry-mechanismen, maar die zijn niet altijd betrouwbaar en hebben limieten. Oplossingen:</p>
+    <ul>
+      <li><strong>Idempotency keys</strong> implementeren zodat herhaalde verzending geen duplicaten veroorzaakt</li>
+      <li><strong>Webhook event log</strong> bijhouden in een database voor reconciliatie</li>
+      <li><strong>Backup polling</strong> als fallback voor gemiste events</li>
+    </ul>
+
+    <div class="code-block">
+<span class="comment">// Webhook signature validatie (essentieel voor security)</span>
+const signature = req.headers['x-webhook-signature'];
+const expectedSig = hmac('sha256', WEBHOOK_SECRET, req.rawBody);
+
+if (signature !== expectedSig) {
+  <span class="comment">// Reject: mogelijke aanval</span>
+  return res.status(401).send('Unauthorized');
+}
+    </div>
+
+    <h2>Event-driven architectuur: voor serieus werk</h2>
+    <p>Wanneer jouw automation-platform deel uitmaakt van een kritisch bedrijfsproces waarbij geen enkel event verloren mag gaan, is een message broker de juiste keuze. Populaire opties zijn Apache Kafka, RabbitMQ en AWS SQS.</p>
+    <p>Het principe: producers schrijven events naar een queue of topic. Consumers verwerken die events in hun eigen tempo. De broker garandeert dat elk event minstens één keer wordt verwerkt — ook als een consumer tijdelijk uitvalt.</p>
+
+    <h3>Wanneer event-driven de juiste keuze is</h3>
+    <ul>
+      <li>Meerdere systemen moeten op hetzelfde event reageren (fan-out)</li>
+      <li>Hoge volumes: 10.000+ events per uur</li>
+      <li>Gegarandeerde verwerking is zakelijk vereist (financiële transacties, medische data)</li>
+      <li>Je hebt verschillende consumers met verschillende verwerkingstijden</li>
+    </ul>
+
+    <h3>Praktijkvoorbeeld: logistieke orderverwerking</h3>
+    <p>Bij DHL Nederland verwerken we dagelijks 80.000+ orderstatuswijzigingen. Een REST polling-aanpak zou dit systeem overbelasten. Webhooks zouden te veel risico geven op verloren events. De oplossing: alle statuswijzigingen worden geschreven naar een Kafka-topic. Drie consumers lezen dezelfde events: één voor klantkommunicatie (sms/e-mail), één voor WMS-updates, één voor finance-rapportage. Ze verwerken elk op hun eigen snelheid — geen van allen kan events missen.</p>
+
+    <h2>Het beslismodel in één overzicht</h2>
+    <p>Stel jezelf deze vragen:</p>
+    <ol>
+      <li>Ondersteunt het bronsysteem webhooks? <strong>Nee</strong> → gebruik polling. <strong>Ja</strong> → ga naar vraag 2.</li>
+      <li>Is delivery-garantie zakelijk kritisch? <strong>Nee</strong> → webhooks volstaan. <strong>Ja</strong> → ga naar vraag 3.</li>
+      <li>Is het volume meer dan 10.000 events per dag? <strong>Nee</strong> → webhooks + event log volstaan. <strong>Ja</strong> → event-driven met message broker.</li>
+    </ol>
+
+    <div class="callout">
+      <p><strong>Valkuil:</strong> Kies niet voor event-driven architectuur omdat het "modern" klinkt. De complexiteit is reëel — het verhoogt de leercurve, de infrastructuurkosten, en de operationele last. Gebruik het alleen als de use case het rechtvaardigt.</p>
+    </div>
+  </div>
+
+  <div class="article-cta">
+    <h3>Hulp nodig bij de technische architectuur?</h3>
+    <p>Onze technisch architecten helpen je de juiste keuze te maken voor jouw specifieke situatie.</p>
+    <a href="index.html#contact" class="btn-primary">Technisch Adviesgesprek</a>
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 Nemoclaw Consultants</span>
+  <div style="display:flex;gap:24px"><a href="blog.html">Kennisbank</a><a href="index.html#contact">Contact</a></div>
+</footer>
+</body>
+</html>

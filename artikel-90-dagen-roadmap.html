@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>De 90-dagen automation roadmap: van business case naar live in productie — Nemoclaw</title>
+<meta name="description" content="Een bewezen aanpak in drie fasen — discovery, build en scale — waarmee je in drie maanden meetbare resultaten behaalt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0A0C12; --surface: #0F1220; --surface2: #141828; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13); --text: #F0F4FA; --muted: #6B7A99; --muted2: #9AA4B8; --accent: #E8501E; --purple: #7B3FC4; --logo-gradient: linear-gradient(135deg, #7B3FC4, #E8501E); }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; background: rgba(10,12,18,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo { text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .nav-logo-icon { width: 32px; height: 32px; background: var(--logo-gradient); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-icon svg { width: 18px; height: 18px; }
+  .nav-logo-text { display: flex; flex-direction: column; gap: 1px; }
+  .nav-logo-primary { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  .nav-logo-secondary { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted2); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; }
+  .nav-cta:hover { background: #FF6B3D; }
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+  .mobile-nav { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+  .mobile-nav.open { display: flex; }
+  .mobile-nav a { color: var(--text); text-decoration: none; font-size: 24px; font-weight: 500; }
+  .mobile-nav-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: var(--text); font-size: 28px; cursor: pointer; }
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 100px 48px 80px; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--muted2); text-decoration: none; font-size: 14px; margin-bottom: 40px; transition: color .2s; }
+  .back-link:hover { color: var(--text); }
+  .back-link svg { width: 16px; height: 16px; }
+  .article-category { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .article-title { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 4vw, 50px); line-height: 1.1; font-weight: 400; margin-bottom: 24px; }
+  .article-meta { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .article-meta img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .meta-name { color: var(--text); font-weight: 500; font-size: 14px; }
+  .meta-sub { font-size: 13px; color: var(--muted); }
+  .article-cover { width: 100%; height: 400px; object-fit: cover; border-radius: 16px; margin-bottom: 48px; }
+  .article-body { font-size: 17px; line-height: 1.8; color: #D0D8EC; }
+  .article-body p { margin-bottom: 24px; }
+  .article-body h2 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin: 48px 0 20px; line-height: 1.2; }
+  .article-body h3 { font-size: 18px; font-weight: 600; color: var(--text); margin: 32px 0 14px; }
+  .article-body ul, .article-body ol { padding-left: 24px; margin-bottom: 24px; }
+  .article-body li { margin-bottom: 10px; }
+  .article-body strong { color: var(--text); font-weight: 600; }
+  .callout { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 10px; padding: 24px 28px; margin: 32px 0; }
+  .callout p { margin: 0; font-size: 16px; color: var(--muted2); }
+  .callout strong { color: var(--text); }
+  .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0; }
+  .phase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .phase-card:nth-child(1) { border-top: 3px solid var(--purple); }
+  .phase-card:nth-child(2) { border-top: 3px solid var(--accent); }
+  .phase-card:nth-child(3) { border-top: 3px solid #22C55E; }
+  .phase-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .phase-card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .phase-card p { font-size: 14px; color: var(--muted2); line-height: 1.6; margin: 0; }
+  .week-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin-bottom: 16px; }
+  .week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .week-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .week-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
+  .tag-discovery { background: rgba(123,63,196,0.15); color: var(--purple); }
+  .tag-build { background: rgba(232,80,30,0.12); color: var(--accent); }
+  .tag-scale { background: rgba(34,197,94,0.12); color: #22C55E; }
+  .week-tasks { list-style: none; padding: 0; }
+  .week-tasks li { font-size: 14px; color: var(--muted2); padding: 4px 0; display: flex; gap: 8px; }
+  .week-tasks li::before { content: '→'; color: var(--accent); }
+  .article-cta { background: linear-gradient(135deg, rgba(123,63,196,0.12), rgba(232,80,30,0.08)); border: 1px solid rgba(123,63,196,0.25); border-radius: 16px; padding: 48px; text-align: center; margin-top: 64px; }
+  .article-cta h3 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; margin-bottom: 12px; }
+  .article-cta p { color: var(--muted2); margin-bottom: 28px; }
+  .btn-primary { display: inline-block; background: var(--accent); color: #fff; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all .2s; }
+  .btn-primary:hover { background: #FF6B3D; transform: translateY(-1px); }
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; } .nav-links, .nav-cta { display: none; } .hamburger { display: flex; }
+    .article-wrap { padding: 90px 20px 60px; } .phase-grid { grid-template-columns: 1fr; }
+    .article-cover { height: 220px; } footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7 22 17 12 22 2 17 2 7"/><polyline points="12 22 12 12"/><polyline points="22 7 12 12"/><polyline points="2 7 12 12"/></svg></div>
+    <div class="nav-logo-text"><span class="nav-logo-primary">NEMOCLAW</span><span class="nav-logo-secondary">CONSULTANTS</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="marketplace.html">Marketplace</a></li><li><a href="pricing.html">Prijzen</a></li><li><a href="blog.html" style="color:var(--accent)">Kennisbank</a></li>
+  </ul>
+  <a href="index.html#contact" class="nav-cta">Gesprek Plannen</a>
+  <button class="hamburger" onclick="document.querySelector('.mobile-nav').classList.add('open')"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav">
+  <button class="mobile-nav-close" onclick="document.querySelector('.mobile-nav').classList.remove('open')">&times;</button>
+  <a href="index.html">Home</a><a href="marketplace.html">Marketplace</a><a href="pricing.html">Prijzen</a><a href="blog.html">Kennisbank</a><a href="index.html#contact" style="color:var(--accent)">Gesprek Plannen</a>
+</div>
+
+<div class="article-wrap">
+  <a href="blog.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Terug naar Kennisbank
+  </a>
+
+  <div class="article-category">Strategie</div>
+  <h1 class="article-title">De 90-dagen automation roadmap: van business case naar live in productie</h1>
+
+  <div class="article-meta">
+    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=faces&auto=format" alt="Maarten van der Berg">
+    <div>
+      <div class="meta-name">Maarten van der Berg</div>
+      <div class="meta-sub">14 januari 2026 &nbsp;·&nbsp; 10 min lezen</div>
+    </div>
+  </div>
+
+  <img class="article-cover" src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&auto=format&fit=crop" alt="Automation roadmap strategie">
+
+  <div class="article-body">
+    <p>De meeste automation-trajecten mislukken niet door slechte technologie. Ze mislukken door slechte planning, te brede scope, en het ontbreken van een duidelijke methodiek. Na tientallen projecten bij uiteenlopende organisaties hanteren wij consequent dezelfde aanpak: 90 dagen, drie fasen, één duidelijk doel per kwartaal. Dit is hoe dat eruitziet.</p>
+
+    <div class="callout">
+      <p><strong>Principe:</strong> Niet het meest complexe proces automatiseren, maar het proces dat de snelste bewezen waarde levert. Vertrouwen is een fundament — bouw het eerst.</p>
+    </div>
+
+    <h2>Overzicht: de drie fasen</h2>
+    <div class="phase-grid">
+      <div class="phase-card">
+        <div class="phase-label">Fase 1 · Week 1–4</div>
+        <h3>Discovery</h3>
+        <p>Processen in kaart brengen, prioriteren, business case opbouwen, platformkeuze maken, team samenstellen.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-label">Fase 2 · Week 5–10</div>
+        <h3>Build</h3>
+        <p>Eerste use case ontwerpen, bouwen, testen en live brengen. Stakeholders meenemen, resultaten meten.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-label">Fase 3 · Week 11–13</div>
+        <h3>Scale</h3>
+        <p>Lessen verwerken, tweede use case plannen, governance inrichten, kennisoverdracht naar intern team.</p>
+      </div>
+    </div>
+
+    <h2>Fase 1: Discovery (week 1–4)</h2>
+    <p>De discovery-fase bepaalt of je project slaagt of faalt. Hier wordt de basis gelegd — en hier worden de meeste fouten gemaakt.</p>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 1: Procesanalyse en stakeholder mapping</span><span class="week-tag tag-discovery">Discovery</span></div>
+      <ul class="week-tasks">
+        <li>Inventariseer alle handmatige processen per afdeling via interviews en observatie</li>
+        <li>Kwantificeer uren, volumes en foutpercentages per proces</li>
+        <li>Identificeer de primaire stakeholders en hun belangen</li>
+        <li>Breng IT-landschap in kaart: welke systemen bestaan, welke APIs zijn beschikbaar?</li>
+      </ul>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 2: Prioritering en use case selectie</span><span class="week-tag tag-discovery">Discovery</span></div>
+      <ul class="week-tasks">
+        <li>Score elk process op: volume × tijdsbesparing × complexiteit × strategisch belang</li>
+        <li>Selecteer de "quick win" use case: hoog volume, lage complexiteit, meetbaar resultaat</li>
+        <li>Valideer de selectie met management en end-users</li>
+        <li>Stel succescriteria vast voor dag 90</li>
+      </ul>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 3–4: Business case en platformkeuze</span><span class="week-tag tag-discovery">Discovery</span></div>
+      <ul class="week-tasks">
+        <li>Bouw de business case op basis van kwantitatieve data uit week 1–2</li>
+        <li>Kies het platform op basis van technische eisen, niet op basis van marketing</li>
+        <li>Richt de development-omgeving in en stel toegangsrechten in</li>
+        <li>Kick-off met het volledige projectteam: doel, aanpak, rolverdeling</li>
+      </ul>
+    </div>
+
+    <h2>Fase 2: Build (week 5–10)</h2>
+    <p>In de build-fase bouwen we de eerste use case. De gouden regel: begin zo smal mogelijk. Een workflow die 80% van de gevallen dekt en live is, is waardevoller dan een perfect systeem dat nog zes maanden in ontwikkeling zit.</p>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 5–6: Ontwerp en technische architectuur</span><span class="week-tag tag-build">Build</span></div>
+      <ul class="week-tasks">
+        <li>Teken het procesontwerp: happy flow + alle uitzonderingspaden</li>
+        <li>Definieer de integratiepunten met bestaande systemen</li>
+        <li>Bouw de basis-integraties en test de API-verbindingen</li>
+        <li>Valideer het ontwerp met de process owner</li>
+      </ul>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 7–8: Bouwfase en interne tests</span><span class="week-tag tag-build">Build</span></div>
+      <ul class="week-tasks">
+        <li>Bouw de workflow incrementeel — begin met de happy flow</li>
+        <li>Voeg uitzonderingspaden stap voor stap toe</li>
+        <li>Voer unit tests uit op elke stap</li>
+        <li>Laat end-users de workflow testen met echte (geanonimiseerde) data</li>
+      </ul>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 9–10: Parallelle run en go-live</span><span class="week-tag tag-build">Build</span></div>
+      <ul class="week-tasks">
+        <li>Draai twee weken parallel: automation én handmatig proces tegelijk</li>
+        <li>Vergelijk outputs op nauwkeurigheid en volledigheid</li>
+        <li>Verbeter op basis van bevindingen</li>
+        <li>Go-live na groen licht van process owner en IT</li>
+      </ul>
+    </div>
+
+    <h2>Fase 3: Scale (week 11–13)</h2>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 11–12: Meten, leren en verbeteren</span><span class="week-tag tag-scale">Scale</span></div>
+      <ul class="week-tasks">
+        <li>Meet de werkelijke resultaten tegen de business case</li>
+        <li>Documenteer wat anders ging dan verwacht</li>
+        <li>Verzamel feedback van eindgebruikers</li>
+        <li>Verbeter de workflow op basis van productie-ervaringen</li>
+      </ul>
+    </div>
+
+    <div class="week-block">
+      <div class="week-header"><span class="week-title">Week 13: Governance en volgende fase plannen</span><span class="week-tag tag-scale">Scale</span></div>
+      <ul class="week-tasks">
+        <li>Richt eigenaarschap in: wie is verantwoordelijk voor de workflow in productie?</li>
+        <li>Stel monitoring en alerting in voor procesfouten</li>
+        <li>Definieer de tweede use case op basis van de geleerde lessen</li>
+        <li>Presenteer resultaten aan management — inclusief ROI</li>
+      </ul>
+    </div>
+
+    <h2>De meest gemaakte fouten</h2>
+    <p>In tien jaar automation-projecten zijn dit de patronen die ik keer op keer zie mislopen:</p>
+    <ul>
+      <li><strong>Te grote eerste scope.</strong> Begin met één proces, niet met tien. Bewijs de waarde, dan groeit het budget vanzelf.</li>
+      <li><strong>IT wordt als blokkade gezien.</strong> Maak IT een medestander — zij kennen het technische landschap en kunnen de doorlooptijd halveren als ze goed zijn ingelicht.</li>
+      <li><strong>Geen eigenaar na go-live.</strong> Een workflow in productie heeft onderhoud nodig. Bepaal vooraf wie de eigenaar is en hoe verstoringen worden opgepakt.</li>
+      <li><strong>Resultaten niet meten.</strong> Als je de resultaten niet meet, kun je ze ook niet verdedigen. Bouw monitoring in vanaf dag 1.</li>
+    </ul>
+
+    <div class="callout">
+      <p><strong>Onze belofte:</strong> Als je deze methodiek consequent toepast, heb je na 90 dagen een live workflow, meetbare resultaten, en genoeg intern draagvlak om fase 2 te starten. Dat is het doel — niet perfectie, maar bewezen waarde.</p>
+    </div>
+  </div>
+
+  <div class="article-cta">
+    <h3>Wil je samen een roadmap opstellen?</h3>
+    <p>In een gratis sessie van 90 minuten brengen we jouw processen in kaart en stellen we een concrete 90-dagenplan op.</p>
+    <a href="index.html#contact" class="btn-primary">Roadmap Sessie Inplannen</a>
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 Nemoclaw Consultants</span>
+  <div style="display:flex;gap:24px"><a href="blog.html">Kennisbank</a><a href="index.html#contact">Contact</a></div>
+</footer>
+</body>
+</html>

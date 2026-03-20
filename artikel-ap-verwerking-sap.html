@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Van 5 dagen naar 4 uur: zo automatiseer je AP-verwerking in SAP — Nemoclaw</title>
+<meta name="description" content="Stap-voor-stap uitleg van hoe Rabobank hun accounts payable-proces volledig automatiseerde, inclusief de valkuilen onderweg.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0A0C12; --surface: #0F1220; --surface2: #141828; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13); --text: #F0F4FA; --muted: #6B7A99; --muted2: #9AA4B8; --accent: #E8501E; --purple: #7B3FC4; --logo-gradient: linear-gradient(135deg, #7B3FC4, #E8501E); }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; background: rgba(10,12,18,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo { text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .nav-logo-icon { width: 32px; height: 32px; background: var(--logo-gradient); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-icon svg { width: 18px; height: 18px; }
+  .nav-logo-text { display: flex; flex-direction: column; gap: 1px; }
+  .nav-logo-primary { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  .nav-logo-secondary { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted2); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; }
+  .nav-cta:hover { background: #FF6B3D; }
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+  .mobile-nav { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+  .mobile-nav.open { display: flex; }
+  .mobile-nav a { color: var(--text); text-decoration: none; font-size: 24px; font-weight: 500; }
+  .mobile-nav-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: var(--text); font-size: 28px; cursor: pointer; }
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 100px 48px 80px; }
+  .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--muted2); text-decoration: none; font-size: 14px; margin-bottom: 40px; transition: color .2s; }
+  .back-link:hover { color: var(--text); }
+  .back-link svg { width: 16px; height: 16px; }
+  .article-category { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .article-title { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 4vw, 50px); line-height: 1.1; font-weight: 400; margin-bottom: 24px; }
+  .article-meta { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .article-meta img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .meta-name { color: var(--text); font-weight: 500; font-size: 14px; }
+  .meta-sub { font-size: 13px; color: var(--muted); }
+  .article-cover { width: 100%; height: 400px; object-fit: cover; border-radius: 16px; margin-bottom: 48px; }
+  .article-body { font-size: 17px; line-height: 1.8; color: #D0D8EC; }
+  .article-body p { margin-bottom: 24px; }
+  .article-body h2 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin: 48px 0 20px; line-height: 1.2; }
+  .article-body h3 { font-size: 18px; font-weight: 600; color: var(--text); margin: 32px 0 14px; }
+  .article-body ul, .article-body ol { padding-left: 24px; margin-bottom: 24px; }
+  .article-body li { margin-bottom: 10px; }
+  .article-body strong { color: var(--text); font-weight: 600; }
+  .callout { background: var(--surface); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 10px; padding: 24px 28px; margin: 32px 0; }
+  .callout p { margin: 0; font-size: 16px; color: var(--muted2); }
+  .callout strong { color: var(--text); }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; }
+  .stat-number { font-family: 'DM Serif Display', serif; font-size: 40px; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+  .stat-label { font-size: 13px; color: var(--muted2); line-height: 1.4; }
+  .step-list { list-style: none; padding: 0; margin: 32px 0; counter-reset: steps; }
+  .step-list li { counter-increment: steps; display: flex; gap: 20px; margin-bottom: 28px; }
+  .step-list li::before { content: counter(steps); background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-content h4 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .step-content p { font-size: 15px; color: var(--muted2); margin: 0; line-height: 1.6; }
+  .article-cta { background: linear-gradient(135deg, rgba(123,63,196,0.12), rgba(232,80,30,0.08)); border: 1px solid rgba(123,63,196,0.25); border-radius: 16px; padding: 48px; text-align: center; margin-top: 64px; }
+  .article-cta h3 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; margin-bottom: 12px; }
+  .article-cta p { color: var(--muted2); margin-bottom: 28px; }
+  .btn-primary { display: inline-block; background: var(--accent); color: #fff; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all .2s; }
+  .btn-primary:hover { background: #FF6B3D; transform: translateY(-1px); }
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; } .nav-links, .nav-cta { display: none; } .hamburger { display: flex; }
+    .article-wrap { padding: 90px 20px 60px; } .stat-grid { grid-template-columns: 1fr 1fr; }
+    .article-cover { height: 220px; } footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7 22 17 12 22 2 17 2 7"/><polyline points="12 22 12 12"/><polyline points="22 7 12 12"/><polyline points="2 7 12 12"/></svg></div>
+    <div class="nav-logo-text"><span class="nav-logo-primary">NEMOCLAW</span><span class="nav-logo-secondary">CONSULTANTS</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="marketplace.html">Marketplace</a></li><li><a href="pricing.html">Prijzen</a></li><li><a href="blog.html" style="color:var(--accent)">Kennisbank</a></li>
+  </ul>
+  <a href="index.html#contact" class="nav-cta">Gesprek Plannen</a>
+  <button class="hamburger" onclick="document.querySelector('.mobile-nav').classList.add('open')"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav">
+  <button class="mobile-nav-close" onclick="document.querySelector('.mobile-nav').classList.remove('open')">&times;</button>
+  <a href="index.html">Home</a><a href="marketplace.html">Marketplace</a><a href="pricing.html">Prijzen</a><a href="blog.html">Kennisbank</a><a href="index.html#contact" style="color:var(--accent)">Gesprek Plannen</a>
+</div>
+
+<div class="article-wrap">
+  <a href="blog.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Terug naar Kennisbank
+  </a>
+
+  <div class="article-category">Finance</div>
+  <h1 class="article-title">Van 5 dagen naar 4 uur: zo automatiseer je AP-verwerking in SAP</h1>
+
+  <div class="article-meta">
+    <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=80&h=80&fit=crop&crop=faces&auto=format" alt="Emma van Dijk">
+    <div>
+      <div class="meta-name">Emma van Dijk</div>
+      <div class="meta-sub">22 februari 2026 &nbsp;·&nbsp; 11 min lezen</div>
+    </div>
+  </div>
+
+  <img class="article-cover" src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&auto=format&fit=crop" alt="Finance automatisering dashboard">
+
+  <div class="article-body">
+    <p>Handmatige factuurverwerking is een van de duurste inefficiënties die ik zie bij financiële afdelingen. Bij grote organisaties gaan medewerkers dagelijks uren verloren aan het invoeren, controleren en goedkeuren van facturen — met fouten, late betalingen en gefrustreerde leveranciers als gevolg. Dit artikel beschrijft hoe wij bij een grote Nederlandse bank de volledige AP-cyclus automatiseerden in SAP, van binnenkomst tot boekhouding.</p>
+
+    <div class="callout">
+      <p><strong>Resultaten na implementatie:</strong> Van gemiddeld 5 werkdagen doorlooptijd per factuur naar minder dan 4 uur. Foutpercentage daalde van 4,2% naar 0,3%. Jaarlijkse besparing: <strong>€ 210.000</strong>.</p>
+    </div>
+
+    <h2>De uitgangssituatie</h2>
+    <p>De organisatie verwerkte maandelijks ruim 2.200 inkomende facturen via drie kanalen: e-mail (als PDF-bijlage), EDI-berichten van grote leveranciers, en nog een kleine stroom papieren facturen via de post. Elke factuur werd handmatig door een medewerker ingevoerd in SAP FI, goedgekeurd door een manager via e-mail, en vervolgens geboekt. Het hele proces duurde gemiddeld 5 werkdagen per factuur.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">2.200</div>
+        <div class="stat-label">Facturen per maand te verwerken</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4,2%</div>
+        <div class="stat-label">Foutpercentage voor automatisering</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">5 dgn</div>
+        <div class="stat-label">Gemiddelde doorlooptijd per factuur</div>
+      </div>
+    </div>
+
+    <h2>De architectuur van de oplossing</h2>
+    <p>We kozen voor een vierlaagsarchitectuur die volledig integreert met het bestaande SAP-landschap:</p>
+
+    <h3>Laag 1: Documentinname</h3>
+    <p>Via een gedeeld e-mailpostvak worden binnenkomende facturen automatisch opgehaald. De automation workflow herkent het documenttype (PDF-factuur, XML/EDI, scan) en stuurt het naar de juiste verwerkingspijplijn.</p>
+
+    <h3>Laag 2: Data-extractie via OCR + AI</h3>
+    <p>PDF-facturen worden verwerkt door een combinatie van OCR en een getraind AI-model dat factuurvelden herkent: factuurnummer, datum, bedrag, btw-splitsing, en leveranciersgegevens. De nauwkeurigheid voor bekende leveranciers is 98,7%. Voor nieuwe leveranciers worden de geëxtraheerde velden ter controle aan een medewerker voorgelegd.</p>
+
+    <h3>Laag 3: Validatie en 3-way matching</h3>
+    <p>De workflow voert automatisch een drie-weg-vergelijking uit: de factuur wordt gecontroleerd tegen de inkooporder (PO) in SAP MM en de ontvangstbevestiging uit SAP WM. Als alle drie overeenkomen binnen de ingestelde tolerantiegrenzen (standaard ±2%), wordt de factuur automatisch goedgekeurd.</p>
+
+    <h3>Laag 4: SAP-boekhouding en betaling</h3>
+    <p>Goedgekeurde facturen worden via de SAP BAPI-interface automatisch geboekt in FI/CO, inclusief correcte kostenplaats- en grootboekrekeningallocatie. De betaalrun wordt voorgesteld aan de treasury afdeling voor finale accordering.</p>
+
+    <h2>Stap-voor-stap implementatieproces</h2>
+    <ol class="step-list">
+      <li>
+        <div class="step-content">
+          <h4>Process mapping en data audit (week 1–2)</h4>
+          <p>We brachten alle varianten van het huidige proces in kaart — inclusief de uitzonderingen. Dit is ook het moment waarop je ontdekt hoe vuil de masterdata is. In dit project moesten we 340 leveranciersrecords opschonen.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <h4>OCR-model trainen (week 2–4)</h4>
+          <p>We verzamelden 600 historische facturen als trainingsset. Het model leerde de specifieke factuurlay-outs van de 80 meest voorkomende leveranciers herkennen. Training koste 2 weken, maar leverde 98% nauwkeurigheid op voor die groep.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <h4>SAP-integratie bouwen (week 4–8)</h4>
+          <p>De connectie met SAP verloopt via RFC-functies en BAPI's. We bouwden een foutafhandelingslaag die SAP-terugmeldingen vertaalt naar duidelijke actiepunten voor de medewerker. Geen cryptische SAP-foutmeldingen meer.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <h4>Goedkeuringsworkflow en uitzonderingenmanagement (week 7–10)</h4>
+          <p>Facturen die niet automatisch kunnen worden goedgekeurd (mismatches, nieuwe leveranciers, hoge bedragen) komen in een uitzonderingswachtrij. Medewerkers zien alleen de facturen waar menselijk oordeel nodig is.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <h4>Paralleltest en go-live (week 10–12)</h4>
+          <p>Twee weken draaiden we het systeem parallel aan het handmatige proces. Na validatie werd de handmatige stroom uitgeschakeld. Go-live verliep zonder incidenten.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h2>De valkuilen die we tegenkwamen</h2>
+    <p>Eerlijk zijn we ook over wat misliep:</p>
+    <ul>
+      <li><strong>Vuile leveranciersmasterdata.</strong> 15% van de leveranciers had fouten in hun IBAN of btw-nummer. Dit moest eerst gecorrigeerd worden — plan hier altijd tijd voor in.</li>
+      <li><strong>Facturen zonder PO-referentie.</strong> Zo'n 8% van de facturen had geen inkoopordernummer. We bouwden een aparte stroom voor deze "non-PO facturen" met een afwijkend goedkeuringspad.</li>
+      <li><strong>SAP-transportlandschap.</strong> Wijzigingen in het SAP-systeem moesten door het standaard transportproces — dit koste 3 extra weken. Plan SAP-projecten altijd met de Basis-afdeling in.</li>
+    </ul>
+
+    <h2>Wat levert het op?</h2>
+    <p>Na zes maanden in productie zijn de resultaten als volgt:</p>
+    <ul>
+      <li>Gemiddelde doorlooptijd per factuur: van 5 dagen naar <strong>3,8 uur</strong></li>
+      <li>Automatisch verwerkt zonder menselijke tussenkomst: <strong>87% van alle facturen</strong></li>
+      <li>Foutpercentage: van 4,2% naar <strong>0,3%</strong></li>
+      <li>Capaciteit finance team: 2,5 fte vrijgespeeld voor hogere-waarde taken</li>
+      <li>Early payment discounts benut: <strong>+€ 28.000 per jaar</strong> extra door snellere betaling</li>
+    </ul>
+
+    <div class="callout">
+      <p><strong>Lessleerstuk:</strong> De grootste winst zit vaak niet in de directe tijdsbesparing, maar in de snelheid. Snellere betalingen, minder leveranciersklachten, en het benutten van early payment discounts leveren soms meer op dan de bespaarde FTE.</p>
+    </div>
+  </div>
+
+  <div class="article-cta">
+    <h3>Wil je jouw AP-proces automatiseren?</h3>
+    <p>Plan een gratis process scan en ontdek wat mogelijk is in jouw SAP-omgeving.</p>
+    <a href="index.html#contact" class="btn-primary">Gratis Process Scan</a>
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 Nemoclaw Consultants</span>
+  <div style="display:flex;gap:24px"><a href="blog.html">Kennisbank</a><a href="index.html#contact">Contact</a></div>
+</footer>
+</body>
+</html>
