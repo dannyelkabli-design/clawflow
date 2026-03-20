@@ -6,6 +6,12 @@
 <title>Nemoclaw Consultants — AI Automation Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init({ publicKey: '4sM36dgqB59lIgLOb' });
+  const EMAILJS_SERVICE    = 'service_ig9zfsr';
+  const EMAILJS_TEMPLATE   = 'template_88sl09u';
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -396,6 +402,32 @@
   .stat-val { font-family: 'DM Serif Display', serif; font-size: 42px; font-weight: 400; color: var(--text); line-height: 1; }
   .stat-val span { color: var(--accent); }
   .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* PLAYBOOK MODAL */
+  .pb-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .pb-overlay.open { opacity: 1; pointer-events: all; }
+  .pb-modal { background: var(--surface); border: 1px solid rgba(255,255,255,0.13); border-radius: 20px; width: 100%; max-width: 480px; padding: 40px; position: relative; transform: translateY(20px); transition: transform .25s; }
+  .pb-overlay.open .pb-modal { transform: translateY(0); }
+  .pb-modal-bar { height: 3px; background: linear-gradient(135deg,#7B3FC4,#E8501E); position: absolute; top: 0; left: 0; right: 0; border-radius: 20px 20px 0 0; }
+  .pb-close { position: absolute; top: 16px; right: 16px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted2); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .pb-close:hover { color: var(--text); }
+  .pb-icon { width: 48px; height: 48px; background: var(--accent-subtle); border: 1px solid rgba(232,80,30,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 20px; }
+  .pb-modal h3 { font-family: 'DM Serif Display', serif; font-size: 26px; font-weight: 400; margin-bottom: 8px; }
+  .pb-modal p { font-size: 14px; color: var(--muted2); line-height: 1.6; margin-bottom: 24px; }
+  .pb-form { display: flex; flex-direction: column; gap: 12px; }
+  .pb-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--text); font-family: inherit; outline: none; transition: border-color .2s; width: 100%; }
+  .pb-input:focus { border-color: var(--accent); }
+  .pb-input::placeholder { color: var(--muted); }
+  .pb-submit { background: var(--accent); color: #fff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .pb-submit:hover:not(:disabled) { background: #FF6B3D; transform: translateY(-1px); }
+  .pb-submit:disabled { opacity: .6; cursor: not-allowed; }
+  .pb-privacy { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; }
+  .pb-success { text-align: center; padding: 16px 0; display: none; }
+  .pb-success-icon { font-size: 40px; margin-bottom: 12px; }
+  .pb-success h4 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .pb-success p { font-size: 14px; color: var(--muted2); }
+  .pb-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -769,7 +801,7 @@
           </div>
         </div>
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
-          <a class="btn-primary" href="AI_Automation_Playbook_Nemoclaw.pdf" download="AI_Automation_Playbook_Nemoclaw.pdf">Download het playbook gratis →</a>
+          <button class="btn-primary" onclick="openPlaybookModal()">Download het playbook gratis →</button>
           <a class="btn-secondary" href="#contact">Bekijk inhoudsopgave</a>
         </div>
       </div>
@@ -1037,6 +1069,81 @@
     cl.style.gridTemplateColumns = '1fr';
     cl.style.gap = '40px';
   }
+</script>
+
+<!-- PLAYBOOK MODAL -->
+<div class="pb-overlay" id="pb-overlay" onclick="if(event.target===this)closePlaybookModal()">
+  <div class="pb-modal">
+    <div class="pb-modal-bar"></div>
+    <button class="pb-close" onclick="closePlaybookModal()">✕</button>
+
+    <div id="pb-form-wrap">
+      <div class="pb-icon">📘</div>
+      <h3>Ontvang het gratis Playbook</h3>
+      <p>Vul je naam en e-mailadres in — je ontvangt direct een mail met de downloadlink.</p>
+      <div class="pb-form">
+        <input class="pb-input" id="pb-naam" type="text" placeholder="Jouw naam" autocomplete="name">
+        <input class="pb-input" id="pb-email" type="email" placeholder="jouw@email.nl" autocomplete="email">
+        <button class="pb-submit" id="pb-btn" onclick="submitPlaybook()">
+          Stuur mij het Playbook →
+        </button>
+      </div>
+      <p class="pb-privacy">Geen spam. Je gegevens worden niet gedeeld.</p>
+    </div>
+
+    <div class="pb-success" id="pb-success">
+      <div class="pb-success-icon">✅</div>
+      <h4>Check je inbox!</h4>
+      <p>We hebben het AI Automation Playbook naar je e-mailadres gestuurd. Check ook je spam als je het niet ziet.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function openPlaybookModal() {
+  document.getElementById('pb-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('pb-naam').focus();
+}
+
+function closePlaybookModal() {
+  document.getElementById('pb-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function submitPlaybook() {
+  const naam  = document.getElementById('pb-naam').value.trim();
+  const email = document.getElementById('pb-email').value.trim();
+  if (!naam)  { document.getElementById('pb-naam').focus();  return; }
+  if (!email || !email.includes('@')) { document.getElementById('pb-email').focus(); return; }
+
+  const btn = document.getElementById('pb-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="pb-spinner"></div> Versturen…';
+
+  const downloadLink = window.location.origin + '/AI_Automation_Playbook_Nemoclaw.pdf';
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      to_name:       naam,
+      to_email:      email,
+      download_link: downloadLink,
+    });
+    document.getElementById('pb-form-wrap').style.display = 'none';
+    document.getElementById('pb-success').style.display   = 'block';
+  } catch (err) {
+    console.error(err);
+    // Fallback: direct download als EmailJS faalt
+    const a = document.createElement('a');
+    a.href = downloadLink;
+    a.download = 'AI_Automation_Playbook_Nemoclaw.pdf';
+    a.click();
+    closePlaybookModal();
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Stuur mij het Playbook →';
+  }
+}
 </script>
 </body>
 </html>
