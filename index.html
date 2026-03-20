@@ -324,11 +324,13 @@
   }
   .consultant-card:hover { border-color: var(--border2); transform: translateY(-2px); }
   .consultant-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
+    width: 64px; height: 64px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), #0288D1);
     display: flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: 600; color: #000; margin-bottom: 14px;
+    overflow: hidden; border: 2px solid var(--border2);
   }
+  .consultant-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .consultant-name { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
   .consultant-role { font-size: 13px; color: var(--accent); margin-bottom: 10px; }
   .consultant-bio { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
@@ -423,6 +425,10 @@
       </div>
     </div>
     <div class="hero-visual">
+      <div style="position:relative;width:380px;height:280px;border-radius:16px;overflow:hidden;border:1px solid var(--border2);margin-bottom:0;opacity:0.85;">
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=760&h=560&fit=crop&auto=format" alt="AI automation dashboard" style="width:100%;height:100%;object-fit:cover;display:block;">
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(9,13,18,0.6) 0%,rgba(9,13,18,0.2) 100%);"></div>
+      </div>
       <div class="float-card fc1">
         <div class="float-card-label">Tijdsbesparing</div>
         <div class="float-card-val">73%</div>
@@ -627,7 +633,7 @@
     <h2 class="section-title">Specialist beschikbaar voor uw project.</h2>
     <div class="consultants-grid">
       <div class="consultant-card">
-        <div class="consultant-avatar">MV</div>
+        <div class="consultant-avatar"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=128&h=128&fit=crop&crop=faces&auto=format" alt="Maarten van der Berg"></div>
         <div class="consultant-name">Maarten van der Berg</div>
         <div class="consultant-role">OpenClaw Specialist</div>
         <div class="consultant-bio">5 jaar ervaring in finance automation. Gespecialiseerd in factuurverwerking, approvals en ERP-integraties voor middelgrote organisaties.</div>
@@ -639,7 +645,7 @@
         <div class="availability"><div class="avail-dot"></div>Beschikbaar per 1 april</div>
       </div>
       <div class="consultant-card">
-        <div class="consultant-avatar" style="background:linear-gradient(135deg,#C5A84B,#8B6914)">SR</div>
+        <div class="consultant-avatar"><img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=128&h=128&fit=crop&crop=faces&auto=format" alt="Sophie Roodbergen"></div>
         <div class="consultant-name">Sophie Roodbergen</div>
         <div class="consultant-role">Nemoclaw Architect</div>
         <div class="consultant-bio">Gespecialiseerd in complexe overheidsworkflows en compliance automation. Projecten bij Rijkswaterstaat en meerdere gemeenten.</div>
@@ -651,7 +657,7 @@
         <div class="availability"><div class="avail-dot"></div>Beschikbaar per direct</div>
       </div>
       <div class="consultant-card">
-        <div class="consultant-avatar" style="background:linear-gradient(135deg,#7B61FF,#4B3BBF)">DK</div>
+        <div class="consultant-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&h=128&fit=crop&crop=faces&auto=format" alt="David Karels"></div>
         <div class="consultant-name">David Karels</div>
         <div class="consultant-role">AI Workflow Architect</div>
         <div class="consultant-bio">Bouwt end-to-end automation oplossingen voor HR en operations teams. Gecertificeerd in zowel OpenClaw als Nemoclaw platforms.</div>
