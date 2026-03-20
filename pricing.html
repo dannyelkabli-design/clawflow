@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prijzen — Nemoclaw Consultants</title>
+<meta name="description" content="Transparante prijzen voor AI automation trajecten. Van gratis process scan tot volledige implementatie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0A0C12; --surface: #0F1220; --surface2: #141828; --surface3: #1A1F32;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+    --text: #F0F4FA; --muted: #6B7A99; --muted2: #9AA4B8;
+    --accent: #E8501E; --accent2: #C73B12;
+    --accent-subtle: rgba(232,80,30,0.08);
+    --purple: #7B3FC4; --logo-gradient: linear-gradient(135deg, #7B3FC4, #E8501E);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; background: rgba(10,12,18,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: 'DM Sans', sans-serif; text-decoration: none; display: flex; align-items: center; gap: 10px; line-height: 1; }
+  .nav-logo-icon { width: 32px; height: 32px; background: var(--logo-gradient); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-icon svg { width: 18px; height: 18px; }
+  .nav-logo-text { display: flex; flex-direction: column; gap: 1px; }
+  .nav-logo-primary { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  .nav-logo-secondary { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted2); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a.active { color: var(--accent); font-weight: 500; }
+  .nav-cta { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; }
+  .nav-cta:hover { background: #FF6B3D; transform: translateY(-1px); }
+
+  .page-hero { padding: 120px 48px 64px; max-width: 1200px; margin: 0 auto; text-align: center; }
+  .label { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+  .label::before { content: ''; width: 16px; height: 1px; background: var(--accent); }
+  .page-hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(36px, 5vw, 60px); line-height: 1.05; font-weight: 400; margin-bottom: 20px; }
+  .page-hero h1 em { font-style: italic; color: var(--accent); }
+  .page-hero p { font-size: 17px; color: var(--muted2); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+  .toggle-wrap { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 32px; font-size: 14px; color: var(--muted2); }
+  .toggle { width: 44px; height: 24px; background: var(--surface3); border-radius: 100px; border: 1px solid var(--border2); cursor: pointer; position: relative; transition: background .2s; }
+  .toggle.on { background: var(--accent); }
+  .toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform .2s; }
+  .toggle.on::after { transform: translateX(20px); }
+  .save-badge { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: #22C55E; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 100px; }
+
+  .pricing-section { max-width: 1200px; margin: 0 auto; padding: 0 48px 80px; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .pricing-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 36px 32px; position: relative; transition: all .25s; display: flex; flex-direction: column; }
+  .pricing-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+  .pricing-card.popular { border-color: var(--accent); background: linear-gradient(160deg, rgba(232,80,30,0.06) 0%, var(--surface) 50%); }
+  .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 16px; border-radius: 100px; white-space: nowrap; }
+  .pricing-card-top-bar { height: 3px; border-radius: 18px 18px 0 0; position: absolute; top: 0; left: 0; right: 0; }
+  .bar-gradient { background: var(--logo-gradient); }
+  .pricing-name { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 16px; }
+  .pricing-price-wrap { margin-bottom: 8px; }
+  .pricing-price { font-family: 'DM Serif Display', serif; font-size: 48px; font-weight: 400; line-height: 1; }
+  .pricing-price sup { font-size: 22px; font-family: 'DM Sans',sans-serif; font-weight: 600; vertical-align: top; margin-top: 10px; display: inline-block; }
+  .pricing-price-period { font-size: 14px; color: var(--muted); font-family: 'DM Sans',sans-serif; }
+  .pricing-desc { font-size: 14px; color: var(--muted2); line-height: 1.6; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 12px; flex: 1; margin-bottom: 32px; }
+  .pricing-features li { font-size: 14px; color: var(--muted2); display: flex; gap: 10px; align-items: flex-start; }
+  .feat-check { color: #22C55E; flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+  .feat-x { color: var(--muted); flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+  .feat-muted { color: var(--muted); }
+  .pricing-cta-btn { width: 100%; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; display: block; text-align: center; }
+  .cta-outline { background: transparent; border: 1px solid var(--border2); color: var(--text); }
+  .cta-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .cta-filled { background: var(--accent); border: none; color: #fff; }
+  .cta-filled:hover { background: #FF6B3D; transform: translateY(-1px); }
+
+  .compare-section { max-width: 1200px; margin: 0 auto; padding: 0 48px 80px; }
+  .compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table th { font-size: 13px; font-weight: 600; color: var(--muted2); text-align: left; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .compare-table th:not(:first-child) { text-align: center; }
+  .compare-table td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted2); }
+  .compare-table td:not(:first-child) { text-align: center; }
+  .compare-table tr:hover td { background: var(--surface); }
+  .compare-table .category-row td { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); padding-top: 24px; background: none !important; }
+  .check-green { color: #22C55E; font-size: 16px; }
+  .check-x { color: var(--muted); font-size: 16px; }
+  .col-highlight { background: rgba(232,80,30,0.04); }
+
+  .faq-section { max-width: 800px; margin: 0 auto; padding: 0 48px 80px; }
+  .faq-section h2 { font-family: 'DM Serif Display',serif; font-size: 40px; font-weight: 400; margin-bottom: 40px; }
+  .faq-item { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+  .faq-q { width: 100%; background: var(--surface); border: none; padding: 20px 24px; text-align: left; font-size: 15px; font-weight: 500; color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: inherit; gap: 16px; }
+  .faq-q:hover { color: var(--accent); }
+  .faq-icon { width: 20px; height: 20px; border: 1px solid var(--border2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--accent); flex-shrink: 0; transition: transform .3s; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height .4s ease; background: var(--surface); }
+  .faq-item.open .faq-a { max-height: 200px; }
+  .faq-a-inner { padding: 0 24px 20px; font-size: 14px; color: var(--muted2); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 16px; }
+
+  .cta-banner { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 64px; text-align: center; margin: 0 48px 80px; max-width: 1104px; margin-left: auto; margin-right: auto; position: relative; overflow: hidden; }
+  .cta-banner::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+  .cta-banner h2 { font-family: 'DM Serif Display',serif; font-size: 40px; font-weight: 400; margin-bottom: 16px; }
+  .cta-banner p { font-size: 16px; color: var(--muted2); margin-bottom: 32px; }
+  .btn-primary { background: var(--accent); color: #fff; border: none; padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-block; transition: all .2s; }
+  .btn-primary:hover { background: #FF6B3D; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,80,30,0.35); }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    .page-hero, .pricing-section, .compare-section, .faq-section { padding-left: 24px; padding-right: 24px; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .cta-banner { margin: 0 24px 80px; padding: 40px 24px; }
+    .compare-table { display: none; }
+  }
+
+  .fade-up { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+  .fade-up.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="6" cy="12" r="2" fill="white" opacity="0.9"/>
+        <circle cx="16" cy="7" r="2" fill="white" opacity="0.9"/>
+        <circle cx="16" cy="17" r="2" fill="white" opacity="0.9"/>
+        <line x1="8" y1="12" x2="14" y2="7" stroke="white" stroke-width="1.5" opacity="0.7"/>
+        <line x1="8" y1="12" x2="14" y2="17" stroke="white" stroke-width="1.5" opacity="0.7"/>
+      </svg>
+    </div>
+    <div class="nav-logo-text">
+      <span class="nav-logo-primary">Nemoclaw</span>
+      <span class="nav-logo-secondary">Consultants</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#bedrijven">Voor bedrijven</a></li>
+    <li><a href="index.html#consultants">Voor consultants</a></li>
+    <li><a href="marketplace.html">Marketplace</a></li>
+    <li><a href="pricing.html" class="active">Prijzen</a></li>
+    <li><a href="blog.html">Blog</a></li>
+  </ul>
+  <a class="nav-cta" href="index.html#contact">Start intake →</a>
+</nav>
+
+<div class="page-hero fade-up">
+  <div class="label">Transparante prijzen</div>
+  <h1>Investeer in automation<br><em>die zichzelf terugverdient.</em></h1>
+  <p>Geen verborgen kosten. Geen verrassingen. Vaste prijs of time-and-material — u kiest.</p>
+  <div class="toggle-wrap">
+    <span>Per project</span>
+    <div class="toggle" id="billing-toggle" onclick="toggleBilling()"></div>
+    <span>Retainer <span class="save-badge">Bespaar 20%</span></span>
+  </div>
+</div>
+
+<div class="pricing-section">
+  <div class="pricing-grid fade-up">
+
+    <div class="pricing-card">
+      <div class="pricing-name">Process Scan</div>
+      <div class="pricing-price-wrap">
+        <div class="pricing-price"><sup>€</sup><span class="price-val" data-monthly="1950" data-yearly="1560">1.950</span></div>
+        <div class="pricing-price-period">eenmalig · binnen 5 werkdagen</div>
+      </div>
+      <div class="pricing-desc">Wij brengen uw processen, bottlenecks en quick wins in kaart. U ontvangt een concreet automation rapport.</div>
+      <ul class="pricing-features">
+        <li><span class="feat-check">✓</span> Inventarisatie huidige processen</li>
+        <li><span class="feat-check">✓</span> Identificatie van automation kansen</li>
+        <li><span class="feat-check">✓</span> ROI-schatting per proces</li>
+        <li><span class="feat-check">✓</span> Prioriteitenmatrix & roadmap</li>
+        <li><span class="feat-check">✓</span> Presentatie aan management</li>
+        <li><span class="feat-x">—</span><span class="feat-muted"> Implementatie niet inbegrepen</span></li>
+      </ul>
+      <a href="index.html#contact" class="pricing-cta-btn cta-outline">Start met scan →</a>
+    </div>
+
+    <div class="pricing-card popular">
+      <div class="pricing-card-top-bar bar-gradient"></div>
+      <div class="popular-badge">⭐ Meest gekozen</div>
+      <div class="pricing-name">Automation Project</div>
+      <div class="pricing-price-wrap">
+        <div class="pricing-price"><sup>€</sup><span class="price-val" data-monthly="12000" data-yearly="9600">12.000</span></div>
+        <div class="pricing-price-period">vanaf · vaste prijs per project</div>
+      </div>
+      <div class="pricing-desc">Van roadmap tot werkende automation. Inclusief analyse, bouw, testen en overdracht aan uw team.</div>
+      <ul class="pricing-features">
+        <li><span class="feat-check">✓</span> Alles uit Process Scan</li>
+        <li><span class="feat-check">✓</span> Gecertificeerde consultant match</li>
+        <li><span class="feat-check">✓</span> Volledige implementatie & testen</li>
+        <li><span class="feat-check">✓</span> Integratie met bestaande systemen</li>
+        <li><span class="feat-check">✓</span> Training & kennisoverdracht</li>
+        <li><span class="feat-check">✓</span> 3 maanden nazorg inbegrepen</li>
+      </ul>
+      <a href="index.html#contact" class="pricing-cta-btn cta-filled">Start een project →</a>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-name">Enterprise Retainer</div>
+      <div class="pricing-price-wrap">
+        <div class="pricing-price"><sup>€</sup><span class="price-val" data-monthly="4500" data-yearly="3600">4.500</span></div>
+        <div class="pricing-price-period">per maand · min. 6 maanden</div>
+      </div>
+      <div class="pricing-desc">Continue automation capaciteit voor organisaties die structureel willen verbeteren. Dedicated consultant(s).</div>
+      <ul class="pricing-features">
+        <li><span class="feat-check">✓</span> Dedicated senior consultant</li>
+        <li><span class="feat-check">✓</span> Onbeperkte projecten binnen scope</li>
+        <li><span class="feat-check">✓</span> Maandelijkse strategiesessie</li>
+        <li><span class="feat-check">✓</span> Prioriteit in consultant netwerk</li>
+        <li><span class="feat-check">✓</span> Kwartaalrapportage & ROI-review</li>
+        <li><span class="feat-check">✓</span> SLA met responstijd garantie</li>
+      </ul>
+      <a href="index.html#contact" class="pricing-cta-btn cta-outline">Bespreek retainer →</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- VERGELIJKINGSTABEL -->
+<div class="compare-section fade-up">
+  <div class="label">Alles op een rij</div>
+  <h2 style="font-family:'DM Serif Display',serif;font-size:40px;font-weight:400;margin-bottom:40px;">Wat zit er in elk pakket?</h2>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th style="width:40%">Onderdeel</th>
+        <th>Process Scan</th>
+        <th class="col-highlight" style="color:var(--accent)">Automation Project</th>
+        <th>Enterprise</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="category-row"><td colspan="4">Analyse</td></tr>
+      <tr><td>Process inventarisatie</td><td><span class="check-green">✓</span></td><td class="col-highlight"><span class="check-green">✓</span></td><td><span class="check-green">✓</span></td></tr>
+      <tr><td>ROI berekening</td><td><span class="check-green">✓</span></td><td class="col-highlight"><span class="check-green">✓</span></td><td><span class="check-green">✓</span></td></tr>
+      <tr><td>Automation roadmap</td><td><span class="check-green">✓</span></td><td class="col-highlight"><span class="check-green">✓</span></td><td><span class="check-green">✓</span></td></tr>
+      <tr class="category-row"><td colspan="4">Implementatie</td></tr>
+      <tr><td>Consultant match</td><td><span class="check-x">—</span></td><td class="col-highlight"><span class="check-green">✓</span></td><td><span class="check-green">✓</span></td></tr>
+      <tr><td>Bouw & integratie</td><td><span class="check-x">—</span></td><td class="col-highlight"><span class="check-green">✓</span></td><td><span class="check-green">✓</span></td></tr>
+      <tr><td>Training team</td><td><span class="check-x">—</span></td><td class="col-highlight"><span class="check-green">✓</span></td><td><span class="check-green">✓</span></td></tr>
+      <tr class="category-row"><td colspan="4">Support</td></tr>
+      <tr><td>Nazorg periode</td><td><span class="check-x">—</span></td><td class="col-highlight">3 maanden</td><td>Doorlopend</td></tr>
+      <tr><td>Dedicated consultant</td><td><span class="check-x">—</span></td><td class="col-highlight"><span class="check-x">—</span></td><td><span class="check-green">✓</span></td></tr>
+      <tr><td>SLA & responstijd</td><td><span class="check-x">—</span></td><td class="col-highlight"><span class="check-x">—</span></td><td><span class="check-green">✓</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section fade-up">
+  <h2>Veelgestelde vragen over prijzen</h2>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Kan ik beginnen met alleen de Process Scan? <span class="faq-icon">+</span></button>
+    <div class="faq-a"><div class="faq-a-inner">Absoluut. De Process Scan is een losstaand product. Veel klanten starten hiermee om intern draagvlak te creëren en daarna een weloverwogen beslissing te nemen over implementatie. De scan kosten worden verrekend als u doorstroomt naar een project.</div></div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Zijn er verborgen kosten? <span class="faq-icon">+</span></button>
+    <div class="faq-a"><div class="faq-a-inner">Nee. Wij werken met vaste projectprijzen of een duidelijk uurtarief bij time-and-material. Voor aanvang ontvangt u altijd een gedetailleerde offerte. Eventuele licentiekosten voor derde partijen (zoals softwaretools) worden apart gespecificeerd.</div></div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Hoe groot moeten wij zijn om in aanmerking te komen? <span class="faq-icon">+</span></button>
+    <div class="faq-a"><div class="faq-a-inner">Wij werken voor organisaties vanaf 10 medewerkers. Zowel MKB als enterprise en overheidsorganisaties. De schaal van het traject past zich aan aan de grootte en behoeften van uw organisatie.</div></div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Wat als het project complexer wordt dan gepland? <span class="faq-icon">+</span></button>
+    <div class="faq-a"><div class="faq-a-inner">Bij vaste prijs projecten bespreken we scope-wijzigingen altijd vooraf. U beslist of extra scope wenselijk is en wat dit kost. U heeft altijd controle. Bij time-and-material factureren we per besteed uur met wekelijkse rapportage.</div></div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-banner fade-up">
+  <h2>Niet zeker welk pakket past?</h2>
+  <p>Vertel ons over uw situatie — wij adviseren kosteloos en vrijblijvend welke aanpak het meest oplevert.</p>
+  <a class="btn-primary" href="index.html#contact">Vraag gratis advies aan →</a>
+</div>
+
+<script>
+  let billingYearly = false;
+  function toggleBilling() {
+    billingYearly = !billingYearly;
+    document.getElementById('billing-toggle').classList.toggle('on', billingYearly);
+    document.querySelectorAll('.price-val').forEach(el => {
+      const val = billingYearly ? +el.dataset.yearly : +el.dataset.monthly;
+      el.textContent = val.toLocaleString('nl-NL');
+    });
+  }
+  function toggleFaq(btn) {
+    const item = btn.parentElement;
+    item.classList.toggle('open');
+  }
+  document.querySelectorAll('.fade-up').forEach((el, i) => {
+    setTimeout(() => {
+      new IntersectionObserver(([e]) => { if (e.isIntersecting) el.classList.add('visible'); }, { threshold: 0.1 }).observe(el);
+    }, i * 50);
+  });
+</script>
+</body>
+</html>

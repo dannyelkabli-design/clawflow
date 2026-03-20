@@ -3,10 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nemoclaw Consultants — AI Automation Platform</title>
+<title>Nemoclaw Consultants — AI Automation voor bedrijven & overheid</title>
+<meta name="description" content="Nemoclaw Consultants verbindt bedrijven en overheidsorganisaties met gecertificeerde AI automation specialisten. Van process scan tot implementatie — meetbaar resultaat.">
+<meta name="keywords" content="AI automation, process automatisering, OpenClaw, Nemoclaw, consultant, Nederland, overheid, finance, HR">
+<meta name="author" content="Nemoclaw Consultants">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://clawflow-vert.vercel.app/">
+<meta property="og:title" content="Nemoclaw Consultants — AI Automation Platform">
+<meta property="og:description" content="Verbindt bedrijven & overheid met gecertificeerde AI automation experts. Van scan tot implementatie.">
+<meta property="og:image" content="https://clawflow-vert.vercel.app/images/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nemoclaw Consultants — AI Automation Platform">
+<meta name="twitter:description" content="Verbindt bedrijven & overheid met gecertificeerde AI automation experts.">
+<link rel="canonical" href="https://clawflow-vert.vercel.app/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Crisp live chat — vervang JOUW_CRISP_ID via crisp.chat → gratis account -->
+<script>window.$crisp=[];window.CRISP_WEBSITE_ID="JOUW_CRISP_ID";(function(){var d=document;var s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
 <script>
   emailjs.init({ publicKey: '4sM36dgqB59lIgLOb' });
   const EMAILJS_SERVICE    = 'service_ig9zfsr';
@@ -82,6 +96,31 @@
     font-family: 'DM Sans', sans-serif; transition: all .2s;
   }
   .nav-cta:hover { background: #FF6B3D; transform: translateY(-1px); }
+
+  /* HAMBURGER */
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; z-index: 110; }
+  .hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all .3s; display: block; }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* MOBILE NAV OVERLAY */
+  .mobile-nav { position: fixed; inset: 0; background: var(--bg); z-index: 105; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .mobile-nav.open { opacity: 1; pointer-events: all; }
+  .mobile-nav a { font-size: 24px; color: var(--text); text-decoration: none; font-weight: 500; transition: color .2s; }
+  .mobile-nav a:hover { color: var(--accent); }
+  .mobile-nav .mobile-cta { background: var(--accent); color: #fff; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; margin-top: 8px; }
+
+  /* COOKIE BANNER */
+  .cookie-banner { position: fixed; bottom: 24px; left: 24px; right: 24px; max-width: 520px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 14px; padding: 20px 24px; z-index: 190; box-shadow: 0 8px 40px rgba(0,0,0,0.5); transform: translateY(120px); transition: transform .4s cubic-bezier(.175,.885,.32,1.1); }
+  .cookie-banner.show { transform: translateY(0); }
+  .cookie-banner h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .cookie-banner p { font-size: 13px; color: var(--muted2); line-height: 1.6; margin-bottom: 16px; }
+  .cookie-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cookie-accept { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .2s; }
+  .cookie-accept:hover { background: #FF6B3D; }
+  .cookie-decline { background: transparent; color: var(--muted2); border: 1px solid var(--border2); padding: 9px 16px; border-radius: 7px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .2s; }
+  .cookie-decline:hover { border-color: var(--text); color: var(--text); }
 
   /* LAYOUT */
   section { padding: 120px 48px; max-width: 1200px; margin: 0 auto; }
@@ -378,6 +417,8 @@
   @media (max-width: 900px) {
     nav { padding: 0 24px; }
     .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .nav-cta { display: none; }
     section { padding: 80px 24px; }
     .hero-wrap { padding: 100px 24px 60px; }
     .hero-h1 { font-size: 38px; }
@@ -402,6 +443,64 @@
   .stat-val { font-family: 'DM Serif Display', serif; font-size: 42px; font-weight: 400; color: var(--text); line-height: 1; }
   .stat-val span { color: var(--accent); }
   .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* TESTIMONIALS */
+  .testimonials-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 56px; }
+  .testimonial-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; display: flex; flex-direction: column; gap: 16px; transition: border-color .25s; }
+  .testimonial-card:hover { border-color: var(--border2); }
+  .testimonial-stars { display: flex; gap: 3px; }
+  .testimonial-stars span { color: #C5A84B; font-size: 14px; }
+  .testimonial-quote { font-size: 15px; color: var(--muted2); line-height: 1.7; font-style: italic; flex: 1; }
+  .testimonial-quote::before { content: '"'; color: var(--accent); font-size: 32px; font-family: 'DM Serif Display',serif; line-height: .5; display: block; margin-bottom: 8px; }
+  .testimonial-author { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--logo-gradient); }
+  .testimonial-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .testimonial-name { font-size: 14px; font-weight: 600; }
+  .testimonial-role { font-size: 12px; color: var(--muted); }
+  .testimonial-logo { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+
+  /* CASE STUDIES */
+  .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 56px; }
+  .case-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all .25s; }
+  .case-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .case-img { height: 200px; overflow: hidden; position: relative; }
+  .case-img img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(.7); transition: filter .3s; }
+  .case-card:hover .case-img img { filter: brightness(.85); }
+  .case-img-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(9,13,18,.9) 100%); }
+  .case-img-tag { position: absolute; top: 16px; left: 16px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; }
+  .case-body { padding: 24px; }
+  .case-client { font-size: 11px; color: var(--accent); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .case-title { font-family: 'DM Serif Display',serif; font-size: 22px; font-weight: 400; margin-bottom: 10px; line-height: 1.2; }
+  .case-desc { font-size: 13px; color: var(--muted2); line-height: 1.65; margin-bottom: 20px; }
+  .case-results { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .case-result-val { font-family: 'DM Serif Display',serif; font-size: 26px; color: var(--accent); line-height: 1; }
+  .case-result-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* ROI CALCULATOR */
+  .roi-bg { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .roi-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .roi-form { display: flex; flex-direction: column; gap: 20px; }
+  .roi-input-group { display: flex; flex-direction: column; gap: 8px; }
+  .roi-input-group label { font-size: 13px; color: var(--muted2); font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+  .roi-input-group label span { font-size: 13px; color: var(--text); font-weight: 600; }
+  .roi-slider { width: 100%; accent-color: var(--accent); cursor: pointer; height: 4px; }
+  .roi-result { background: var(--surface2); border: 1px solid var(--border2); border-radius: 16px; padding: 36px; position: relative; overflow: hidden; }
+  .roi-result::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--logo-gradient); }
+  .roi-result-label { font-size: 11px; color: var(--accent); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+  .roi-result-main { font-family: 'DM Serif Display',serif; font-size: 56px; font-weight: 400; color: var(--text); line-height: 1; margin-bottom: 6px; }
+  .roi-result-main span { color: var(--accent); }
+  .roi-result-sub { font-size: 14px; color: var(--muted2); margin-bottom: 28px; }
+  .roi-breakdown { display: flex; flex-direction: column; gap: 12px; }
+  .roi-row { display: flex; justify-content: space-between; font-size: 13px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .roi-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .roi-row-label { color: var(--muted2); }
+  .roi-row-val { font-weight: 600; color: var(--text); }
+
+  @media (max-width: 900px) {
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .case-grid { grid-template-columns: 1fr; }
+    .roi-layout { grid-template-columns: 1fr; gap: 40px; }
+  }
 
   /* PLAYBOOK MODAL */
   .pb-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .2s; }
@@ -453,11 +552,26 @@
     <li><a href="#bedrijven">Voor bedrijven</a></li>
     <li><a href="#consultants">Voor consultants</a></li>
     <li><a href="marketplace.html" style="color:var(--accent);font-weight:500;">Marketplace</a></li>
-    <li><a href="#playbook">Playbook</a></li>
+    <li><a href="pricing.html">Prijzen</a></li>
+    <li><a href="blog.html">Kennisbank</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
   <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Start intake →</button>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#bedrijven" onclick="closeMobileNav()">Voor bedrijven</a>
+  <a href="#consultants" onclick="closeMobileNav()">Voor consultants</a>
+  <a href="marketplace.html" onclick="closeMobileNav()">Marketplace</a>
+  <a href="pricing.html" onclick="closeMobileNav()">Prijzen</a>
+  <a href="blog.html" onclick="closeMobileNav()">Blog</a>
+  <a href="#playbook" onclick="closeMobileNav()">Playbook</a>
+  <a href="#contact" onclick="closeMobileNav()" class="mobile-cta">Start intake →</a>
+</div>
 
 <!-- HERO -->
 <div style="position:relative;">
@@ -764,6 +878,132 @@
   </section>
 </div>
 
+<!-- ROI CALCULATOR -->
+<div class="roi-bg">
+  <section style="padding:100px 48px;">
+    <div class="fade-in">
+      <div class="label">ROI Calculator</div>
+      <div class="roi-layout">
+        <div>
+          <h2 class="section-title">Hoeveel kost handmatig werk<br><em>uw organisatie per jaar?</em></h2>
+          <p class="section-sub" style="margin-bottom:40px;">Stel de sliders in en zie direct hoeveel tijd en geld u kunt besparen met automation.</p>
+          <div class="roi-form">
+            <div class="roi-input-group">
+              <label>Aantal medewerkers met repetitieve taken <span id="val-mw">15</span></label>
+              <input type="range" class="roi-slider" id="sl-mw" min="1" max="200" value="15" oninput="calcROI()">
+            </div>
+            <div class="roi-input-group">
+              <label>Uur per week per medewerker verspild <span id="val-uur">8</span> uur</label>
+              <input type="range" class="roi-slider" id="sl-uur" min="1" max="40" value="8" oninput="calcROI()">
+            </div>
+            <div class="roi-input-group">
+              <label>Gemiddeld uurtarief medewerker <span>€ <span id="val-tarief">45</span></span></label>
+              <input type="range" class="roi-slider" id="sl-tarief" min="20" max="150" value="45" oninput="calcROI()">
+            </div>
+            <div class="roi-input-group">
+              <label>Automatiseerbaar percentage <span id="val-auto">65</span>%</label>
+              <input type="range" class="roi-slider" id="sl-auto" min="20" max="90" value="65" oninput="calcROI()">
+            </div>
+          </div>
+        </div>
+        <div class="roi-result">
+          <div class="roi-result-label">Jaarlijkse besparing</div>
+          <div class="roi-result-main" id="roi-main">€ <span id="roi-val">182.520</span></div>
+          <div class="roi-result-sub" id="roi-sub">per jaar — <span id="roi-uren">4.056</span> uur teruggewonnen</div>
+          <div class="roi-breakdown">
+            <div class="roi-row"><span class="roi-row-label">Totale verspilde uren/jaar</span><span class="roi-row-val" id="roi-totaal-uur">—</span></div>
+            <div class="roi-row"><span class="roi-row-label">Automatiseerbare uren/jaar</span><span class="roi-row-val" id="roi-auto-uur">—</span></div>
+            <div class="roi-row"><span class="roi-row-label">Besparing in kosten</span><span class="roi-row-val" id="roi-kosten">—</span></div>
+            <div class="roi-row"><span class="roi-row-label">Terugverdientijd implementatie</span><span class="roi-row-val" id="roi-terugverdien">—</span></div>
+          </div>
+          <a class="btn-primary" href="#contact" style="display:block;text-align:center;margin-top:24px;">Bereken mijn exacte besparing →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="fade-in">
+    <div class="label">Wat klanten zeggen</div>
+    <h2 class="section-title">Resultaten die voor zichzelf spreken.</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <div class="testimonial-quote">Binnen 6 weken hadden we onze factuurverwerking volledig geautomatiseerd. Wat eerst 3 FTE kostte, draait nu op de achtergrond zonder menselijke tussenkomst. De ROI was al na 4 maanden positief.</div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"><img src="https://images.unsplash.com/photo-1556157382-97eda2d62296?w=80&h=80&fit=crop&crop=faces&auto=format" alt=""></div>
+          <div><div class="testimonial-name">Peter van Houten</div><div class="testimonial-role">CFO, Albatros Groep</div></div>
+          <div class="testimonial-logo">Finance</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <div class="testimonial-quote">De consultant die Nemoclaw aan ons koppelde kende onze sector door en door. Geen generieke oplossing, maar maatwerk dat écht werkt binnen de gemeentelijke context. Aanrader voor elke overheidsorganisatie.</div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=80&h=80&fit=crop&crop=faces&auto=format" alt=""></div>
+          <div><div class="testimonial-name">Ingrid Smeets</div><div class="testimonial-role">Programmamanager Digitalisering, Gemeente Breda</div></div>
+          <div class="testimonial-logo">Overheid</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <div class="testimonial-quote">Onze klantenservice verwerkte dagelijks 4.000 mails handmatig. Nu categoriseert en routeert AI 80% automatisch. Onze medewerkers focussen eindelijk op werk dat er echt toe doet.</div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces&auto=format" alt=""></div>
+          <div><div class="testimonial-name">Laura Dijkstra</div><div class="testimonial-role">Head of Customer Operations, Vectro B.V.</div></div>
+          <div class="testimonial-logo">Klantenservice</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section style="padding-top:0;">
+  <div class="fade-in">
+    <div class="label">Case studies</div>
+    <h2 class="section-title">Van probleem naar resultaat.</h2>
+    <div class="case-grid">
+      <div class="case-card">
+        <div class="case-img">
+          <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=700&h=400&fit=crop&auto=format" alt="Finance automation">
+          <div class="case-img-overlay"></div>
+          <span class="case-img-tag">Finance</span>
+        </div>
+        <div class="case-body">
+          <div class="case-client">Rabobank</div>
+          <div class="case-title">AP-factuurverwerking volledig geautomatiseerd</div>
+          <div class="case-desc">2.400 inkomende facturen per maand werden handmatig verwerkt door een team van 4 medewerkers. Na implementatie van een OpenClaw oplossing verloopt 94% volledig automatisch — van herkenning tot boeking in SAP.</div>
+          <div class="case-results">
+            <div><div class="case-result-val">94%</div><div class="case-result-label">Automatisch verwerkt</div></div>
+            <div><div class="case-result-val">3.2 FTE</div><div class="case-result-label">Vrijgemaakt</div></div>
+            <div><div class="case-result-val">€ 210k</div><div class="case-result-label">Besparing/jaar</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-img">
+          <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=700&h=400&fit=crop&auto=format" alt="Overheid automation">
+          <div class="case-img-overlay"></div>
+          <span class="case-img-tag">Overheid</span>
+        </div>
+        <div class="case-body">
+          <div class="case-client">Gemeente Utrecht</div>
+          <div class="case-title">Vergunningsproces teruggebracht van 18 naar 4 dagen</div>
+          <div class="case-desc">Vergunningsaanvragen doorliepen gemiddeld 18 stappen en 18 werkdagen. Met Nemoclaw worden aanvragen automatisch gecategoriseerd, gevalideerd en gerouteerd. Medewerkers ontvangen alleen de uitzonderingen.</div>
+          <div class="case-results">
+            <div><div class="case-result-val">78%</div><div class="case-result-label">Sneller afgehandeld</div></div>
+            <div><div class="case-result-val">4 dagen</div><div class="case-result-label">Doorlooptijd</div></div>
+            <div><div class="case-result-val">9.4/10</div><div class="case-result-label">Burger tevredenheid</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PLAYBOOK -->
 <section id="playbook">
   <div class="fade-in">
@@ -1063,11 +1303,66 @@
     }, 1200);
   }
 
+  // ROI Calculator
+  function calcROI() {
+    const mw     = +document.getElementById('sl-mw').value;
+    const uur    = +document.getElementById('sl-uur').value;
+    const tarief = +document.getElementById('sl-tarief').value;
+    const auto   = +document.getElementById('sl-auto').value / 100;
+    document.getElementById('val-mw').textContent    = mw;
+    document.getElementById('val-uur').textContent   = uur;
+    document.getElementById('val-tarief').textContent = tarief;
+    document.getElementById('val-auto').textContent  = Math.round(auto * 100);
+    const totaalUur  = mw * uur * 52;
+    const autoUur    = Math.round(totaalUur * auto);
+    const besparing  = Math.round(autoUur * tarief);
+    const investering = Math.min(besparing * 0.3, 80000);
+    const terugverdien = investering > 0 ? (investering / (besparing / 12)).toFixed(1) : '—';
+    document.getElementById('roi-val').textContent         = besparing.toLocaleString('nl-NL');
+    document.getElementById('roi-uren').textContent        = autoUur.toLocaleString('nl-NL');
+    document.getElementById('roi-totaal-uur').textContent  = totaalUur.toLocaleString('nl-NL') + ' uur';
+    document.getElementById('roi-auto-uur').textContent    = autoUur.toLocaleString('nl-NL') + ' uur';
+    document.getElementById('roi-kosten').textContent      = '€ ' + besparing.toLocaleString('nl-NL');
+    document.getElementById('roi-terugverdien').textContent = terugverdien + ' maanden';
+    document.getElementById('roi-sub').innerHTML = `per jaar — <span id="roi-uren">${autoUur.toLocaleString('nl-NL')}</span> uur teruggewonnen`;
+  }
+  calcROI();
+
   // Contact layout responsive
   const cl = document.querySelector('.contact-layout');
   if (cl && window.innerWidth < 900) {
     cl.style.gridTemplateColumns = '1fr';
     cl.style.gap = '40px';
+  }
+
+  // Mobile nav
+  function toggleMobileNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    nav.classList.toggle('open');
+    btn.classList.toggle('open');
+    document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+  }
+  function closeMobileNav() {
+    document.getElementById('mobile-nav').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Cookie banner
+  (function() {
+    if (localStorage.getItem('cookie_consent')) return;
+    setTimeout(() => {
+      document.getElementById('cookie-banner').classList.add('show');
+    }, 2000);
+  })();
+  function acceptCookies() {
+    localStorage.setItem('cookie_consent', 'accepted');
+    document.getElementById('cookie-banner').classList.remove('show');
+  }
+  function declineCookies() {
+    localStorage.setItem('cookie_consent', 'declined');
+    document.getElementById('cookie-banner').classList.remove('show');
   }
 </script>
 
@@ -1145,5 +1440,15 @@ async function submitPlaybook() {
   }
 }
 </script>
+
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookie-banner">
+  <h4>🍪 Cookiemelding</h4>
+  <p>Wij gebruiken cookies om de website te verbeteren en het gebruik te analyseren. Lees ons <a href="#" style="color:var(--accent)">privacybeleid</a>.</p>
+  <div class="cookie-actions">
+    <button class="cookie-accept" onclick="acceptCookies()">Accepteren</button>
+    <button class="cookie-decline" onclick="declineCookies()">Alleen noodzakelijk</button>
+  </div>
+</div>
 </body>
 </html>

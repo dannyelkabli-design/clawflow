@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kennisbank — Nemoclaw Consultants</title>
+<meta name="description" content="Praktische gidsen, cases en inzichten over AI-automatisering voor Nederlandse bedrijven. Geschreven door gecertificeerde Nemoclaw- en OpenClaw-experts.">
+<meta property="og:title" content="Kennisbank — Nemoclaw Consultants">
+<meta property="og:description" content="Praktische gidsen, cases en inzichten over AI-automatisering voor Nederlandse bedrijven.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0A0C12; --surface: #0F1220; --surface2: #141828; --surface3: #1A1F32;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+    --text: #F0F4FA; --muted: #6B7A99; --muted2: #9AA4B8;
+    --accent: #E8501E; --accent2: #C73B12;
+    --accent-subtle: rgba(232,80,30,0.08);
+    --purple: #7B3FC4; --logo-gradient: linear-gradient(135deg, #7B3FC4, #E8501E);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+
+  /* ── NAV ── */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; background: rgba(10,12,18,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: 'DM Sans', sans-serif; text-decoration: none; display: flex; align-items: center; gap: 10px; line-height: 1; }
+  .nav-logo-icon { width: 32px; height: 32px; background: var(--logo-gradient); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-icon svg { width: 18px; height: 18px; }
+  .nav-logo-text { display: flex; flex-direction: column; gap: 1px; }
+  .nav-logo-primary { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  .nav-logo-secondary { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted2); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a.active { color: var(--accent); font-weight: 500; }
+  .nav-cta { background: var(--accent); color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; }
+  .nav-cta:hover { background: #FF6B3D; transform: translateY(-1px); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all .3s; }
+  .mobile-nav { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+  .mobile-nav.open { display: flex; }
+  .mobile-nav a { color: var(--text); text-decoration: none; font-size: 24px; font-weight: 500; }
+  .mobile-nav-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: var(--text); font-size: 28px; cursor: pointer; line-height: 1; }
+
+  /* ── HERO ── */
+  .page-hero { padding: 120px 48px 64px; max-width: 1200px; margin: 0 auto; text-align: center; }
+  .label { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+  .label::before { content: ''; width: 16px; height: 1px; background: var(--accent); }
+  .page-hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(36px, 5vw, 60px); line-height: 1.05; font-weight: 400; margin-bottom: 20px; }
+  .page-hero h1 em { font-style: italic; color: var(--accent); }
+  .page-hero p { font-size: 17px; color: var(--muted2); max-width: 560px; margin: 0 auto; line-height: 1.7; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { max-width: 1200px; margin: 0 auto 48px; padding: 0 48px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .filter-btn { padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border2); background: var(--surface); color: var(--muted2); transition: all .2s; }
+  .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filter-bar input { margin-left: auto; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 9px 16px; font-size: 14px; color: var(--text); font-family: inherit; outline: none; width: 240px; transition: border-color .2s; }
+  .filter-bar input::placeholder { color: var(--muted); }
+  .filter-bar input:focus { border-color: var(--accent); }
+
+  /* ── FEATURED ARTICLE ── */
+  .featured-wrap { max-width: 1200px; margin: 0 auto; padding: 0 48px 60px; }
+  .featured-article { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; transition: all .25s; }
+  .featured-article:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .featured-img { position: relative; }
+  .featured-img img { width: 100%; height: 100%; object-fit: cover; min-height: 360px; display: block; }
+  .featured-img-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(123,63,196,0.3), rgba(232,80,30,0.2)); }
+  .featured-badge { position: absolute; top: 20px; left: 20px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 5px 14px; border-radius: 100px; }
+  .featured-content { padding: 48px 48px; display: flex; flex-direction: column; justify-content: center; }
+  .article-category { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .featured-content h2 { font-family: 'DM Serif Display', serif; font-size: clamp(22px, 2.5vw, 34px); font-weight: 400; line-height: 1.2; margin-bottom: 16px; }
+  .featured-content h2 a { color: var(--text); text-decoration: none; transition: color .2s; }
+  .featured-content h2 a:hover { color: var(--accent); }
+  .article-excerpt { color: var(--muted2); line-height: 1.7; margin-bottom: 28px; font-size: 15px; }
+  .article-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--muted); }
+  .article-meta img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+  .meta-divider { width: 3px; height: 3px; background: var(--muted); border-radius: 50%; }
+  .read-more { margin-top: 28px; }
+  .btn-text { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-size: 14px; font-weight: 500; text-decoration: none; transition: gap .2s; }
+  .btn-text:hover { gap: 12px; }
+  .btn-text svg { width: 16px; height: 16px; }
+
+  /* ── ARTICLE GRID ── */
+  .articles-section { max-width: 1200px; margin: 0 auto; padding: 0 48px 100px; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 32px; }
+  .section-header h3 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; }
+  .articles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .article-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all .25s; display: flex; flex-direction: column; }
+  .article-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+  .article-card.hidden { display: none; }
+  .card-img { position: relative; overflow: hidden; }
+  .card-img img { width: 100%; height: 180px; object-fit: cover; display: block; transition: transform .4s; }
+  .article-card:hover .card-img img { transform: scale(1.04); }
+  .card-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,18,32,0.6), transparent); }
+  .card-cat { position: absolute; bottom: 12px; left: 14px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); padding: 3px 10px; border-radius: 100px; }
+  .card-body { padding: 24px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .card-body h4 { font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400; line-height: 1.3; }
+  .card-body h4 a { color: var(--text); text-decoration: none; transition: color .2s; }
+  .card-body h4 a:hover { color: var(--accent); }
+  .card-body p { font-size: 14px; color: var(--muted2); line-height: 1.6; flex: 1; }
+  .card-footer { padding: 0 24px 20px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .card-author { display: flex; align-items: center; gap: 8px; }
+  .card-author img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+  .reading-time { display: flex; align-items: center; gap: 4px; }
+  .reading-time svg { width: 12px; height: 12px; }
+
+  /* ── NEWSLETTER ── */
+  .newsletter-section { max-width: 1200px; margin: 0 auto; padding: 0 48px 100px; }
+  .newsletter-card { background: linear-gradient(135deg, rgba(123,63,196,0.12), rgba(232,80,30,0.08)); border: 1px solid rgba(123,63,196,0.25); border-radius: 20px; padding: 64px 80px; text-align: center; }
+  .newsletter-card h2 { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 3vw, 40px); font-weight: 400; margin-bottom: 14px; }
+  .newsletter-card p { color: var(--muted2); max-width: 440px; margin: 0 auto 36px; line-height: 1.7; }
+  .newsletter-form { display: flex; gap: 12px; max-width: 480px; margin: 0 auto; }
+  .newsletter-form input { flex: 1; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 13px 18px; font-size: 15px; color: var(--text); font-family: inherit; outline: none; transition: border-color .2s; }
+  .newsletter-form input:focus { border-color: var(--accent); }
+  .newsletter-form input::placeholder { color: var(--muted); }
+  .btn-primary { background: var(--accent); color: #fff; border: none; padding: 13px 28px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .2s; white-space: nowrap; }
+  .btn-primary:hover { background: #FF6B3D; transform: translateY(-1px); }
+  .newsletter-note { font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+  /* ── TOPICS SIDEBAR-STYLE ── */
+  .topics-bar { max-width: 1200px; margin: 0 auto; padding: 0 48px 60px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: all .2s; text-decoration: none; }
+  .topic-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .topic-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .topic-card h4 { font-size: 15px; font-weight: 600; color: var(--text); }
+  .topic-card span { font-size: 13px; color: var(--muted); }
+
+  /* ── FOOTER ── */
+  footer { border-top: 1px solid var(--border); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); text-decoration: none; transition: color .2s; }
+  footer a:hover { color: var(--text); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; }
+    .nav-links, .nav-cta { display: none; }
+    .hamburger { display: flex; }
+    .page-hero { padding: 100px 20px 48px; }
+    .filter-bar { padding: 0 20px; }
+    .filter-bar input { width: 100%; margin-left: 0; }
+    .featured-wrap, .articles-section, .newsletter-section, .topics-bar { padding-left: 20px; padding-right: 20px; }
+    .featured-article { grid-template-columns: 1fr; }
+    .featured-img img { min-height: 220px; }
+    .featured-content { padding: 28px; }
+    .articles-grid { grid-template-columns: 1fr; }
+    .topics-bar { grid-template-columns: repeat(2, 1fr); }
+    .newsletter-card { padding: 40px 24px; }
+    .newsletter-form { flex-direction: column; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 22 7 22 17 12 22 2 17 2 7"/>
+        <polyline points="12 22 12 12"/>
+        <polyline points="22 7 12 12"/>
+        <polyline points="2 7 12 12"/>
+      </svg>
+    </div>
+    <div class="nav-logo-text">
+      <span class="nav-logo-primary">NEMOCLAW</span>
+      <span class="nav-logo-secondary">CONSULTANTS</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="marketplace.html">Marketplace</a></li>
+    <li><a href="pricing.html">Prijzen</a></li>
+    <li><a href="blog.html" class="active">Kennisbank</a></li>
+  </ul>
+  <a href="index.html#contact" class="nav-cta">Gesprek Plannen</a>
+  <button class="hamburger" onclick="document.querySelector('.mobile-nav').classList.add('open')" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <button class="mobile-nav-close" onclick="document.querySelector('.mobile-nav').classList.remove('open')">&times;</button>
+  <a href="index.html">Home</a>
+  <a href="marketplace.html">Marketplace</a>
+  <a href="pricing.html">Prijzen</a>
+  <a href="blog.html">Kennisbank</a>
+  <a href="index.html#contact" style="color:var(--accent)">Gesprek Plannen</a>
+</div>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="label">Kennisbank</div>
+  <h1>Alles wat je moet weten over<br><em>AI-automatisering</em></h1>
+  <p>Praktische gidsen, diepgaande cases en strategische inzichten. Geschreven door onze gecertificeerde consultants — gratis voor jou.</p>
+</section>
+
+<!-- TOPICS -->
+<div class="topics-bar">
+  <a class="topic-card" href="#" onclick="filterCategory('Strategie'); return false;">
+    <div class="topic-icon" style="background:rgba(123,63,196,0.12)">🎯</div>
+    <h4>Strategie</h4>
+    <span>8 artikelen</span>
+  </a>
+  <a class="topic-card" href="#" onclick="filterCategory('Finance'); return false;">
+    <div class="topic-icon" style="background:rgba(232,80,30,0.1)">💰</div>
+    <h4>Finance & ERP</h4>
+    <span>6 artikelen</span>
+  </a>
+  <a class="topic-card" href="#" onclick="filterCategory('Techniek'); return false;">
+    <div class="topic-icon" style="background:rgba(34,197,94,0.1)">⚙️</div>
+    <h4>Techniek</h4>
+    <span>11 artikelen</span>
+  </a>
+  <a class="topic-card" href="#" onclick="filterCategory('Overheid'); return false;">
+    <div class="topic-icon" style="background:rgba(59,130,246,0.1)">🏛️</div>
+    <h4>Overheid & AVG</h4>
+    <span>5 artikelen</span>
+  </a>
+</div>
+
+<!-- FEATURED ARTICLE -->
+<div class="featured-wrap">
+  <div class="featured-article">
+    <div class="featured-img">
+      <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop" alt="ROI van AI automatisering">
+      <div class="featured-img-overlay"></div>
+      <div class="featured-badge">Uitgelicht</div>
+    </div>
+    <div class="featured-content">
+      <div class="article-category">Strategie</div>
+      <h2><a href="#">De ROI van AI-automatisering: hoeveel bespaar je écht in het eerste jaar?</a></h2>
+      <p class="article-excerpt">We analyseerden 47 automatiseringsprojecten bij Nederlandse bedrijven. Dit zijn de werkelijke cijfers — inclusief implementatiekosten, doorlooptijd en terugverdientijd per sector.</p>
+      <div class="article-meta">
+        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=64&h=64&fit=crop&crop=faces&auto=format" alt="Maarten">
+        <span>Maarten van der Berg</span>
+        <div class="meta-divider"></div>
+        <span>12 maart 2026</span>
+        <div class="meta-divider"></div>
+        <span>9 min</span>
+      </div>
+      <div class="read-more">
+        <a href="#" class="btn-text">
+          Lees artikel
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterCategory('Alle')">Alle</button>
+  <button class="filter-btn" onclick="filterCategory('Strategie')">Strategie</button>
+  <button class="filter-btn" onclick="filterCategory('Finance')">Finance</button>
+  <button class="filter-btn" onclick="filterCategory('Techniek')">Techniek</button>
+  <button class="filter-btn" onclick="filterCategory('Overheid')">Overheid</button>
+  <button class="filter-btn" onclick="filterCategory('HR')">HR</button>
+  <input type="text" id="searchInput" placeholder="Zoek artikel…" oninput="searchArticles(this.value)">
+</div>
+
+<!-- ARTICLES GRID -->
+<section class="articles-section">
+  <div class="section-header">
+    <h3>Recente artikelen</h3>
+    <span style="font-size:13px;color:var(--muted)">12 artikelen</span>
+  </div>
+  <div class="articles-grid" id="articlesGrid">
+
+    <!-- Article 1 -->
+    <article class="article-card" data-category="Techniek">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=600&auto=format&fit=crop" alt="OpenClaw vs Nemoclaw">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Techniek</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">OpenClaw vs. Nemoclaw: welk platform past bij jouw organisatie?</a></h4>
+        <p>Een eerlijke vergelijking van beide platforms — van licentiekosten en leercurve tot schaalbaarheid en integratiecapabiliteiten.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=faces&auto=format" alt="David">
+          <span>David Karels</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          7 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 2 -->
+    <article class="article-card" data-category="Finance">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&auto=format&fit=crop" alt="AP automatisering">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Finance</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">Van 5 dagen naar 4 uur: zo automatiseer je AP-verwerking in SAP</a></h4>
+        <p>Stap-voor-stap uitleg van hoe Rabobank hun accounts payable-proces volledig automatiseerde, inclusief de valkuilen onderweg.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=48&h=48&fit=crop&crop=faces&auto=format" alt="Emma">
+          <span>Emma van Dijk</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          11 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 3 -->
+    <article class="article-card" data-category="Overheid">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1568992688065-536aad8a12f6?w=600&auto=format&fit=crop" alt="AVG automation">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Overheid</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">AVG-proof automatiseren: de 7 regels die elke overheidsinstantie moet kennen</a></h4>
+        <p>Automatisering en privacywetgeving hoeven niet te botsen. Dit zijn de concrete maatregelen om compliant te blijven.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=48&h=48&fit=crop&crop=faces&auto=format" alt="Sophie">
+          <span>Sophie Roodbergen</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          8 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 4 -->
+    <article class="article-card" data-category="HR">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=600&auto=format&fit=crop" alt="HR onboarding">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">HR</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">Onboarding in 1 dag: hoe Philips 50+ medewerkers per maand automatisch inwerkt</a></h4>
+        <p>Account provisioning, contractondertekening en trainingsplanning — volledig geautomatiseerd zonder één handmatige handeling.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=48&h=48&fit=crop&crop=faces&auto=format" alt="Lisa">
+          <span>Lisa Hermans</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          6 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 5 -->
+    <article class="article-card" data-category="Strategie">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop" alt="Automation roadmap">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Strategie</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">De 90-dagen automation roadmap: van business case naar live in productie</a></h4>
+        <p>Een bewezen aanpak in drie fasen — discovery, build en scale — waarmee je in drie maanden meetbare resultaten behaalt.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=48&h=48&fit=crop&crop=faces&auto=format" alt="Maarten">
+          <span>Maarten van der Berg</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          10 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 6 -->
+    <article class="article-card" data-category="Techniek">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop" alt="API integratie">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Techniek</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">Webhooks, REST of event-driven? De juiste integratiearchitectuur voor jouw workflow</a></h4>
+        <p>Wanneer kies je voor polling vs. webhooks, en wanneer is een message broker zoals Kafka de betere keuze? Met praktijkvoorbeelden.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=faces&auto=format" alt="David">
+          <span>David Karels</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          13 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 7 -->
+    <article class="article-card" data-category="Finance">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop" alt="Reconciliatie">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Finance</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">Automatische reconciliatie: hoe je maandafsluiting van 3 dagen naar 6 uur gaat</a></h4>
+        <p>Transactie-matching, uitzonderingenmanagement en audit trails — volledig geautomatiseerd voor elk ERP-systeem.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=48&h=48&fit=crop&crop=faces&auto=format" alt="Emma">
+          <span>Emma van Dijk</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          9 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 8 -->
+    <article class="article-card" data-category="Strategie">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop" alt="Change management">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Strategie</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">Medewerkers meenemen in automatisering: een praktische change management aanpak</a></h4>
+        <p>Waarom de meeste automation-projecten niet mislukken door techniek, maar door mensen. En hoe je dat voorkomt.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=48&h=48&fit=crop&crop=faces&auto=format" alt="Lisa">
+          <span>Lisa Hermans</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          7 min
+        </div>
+      </div>
+    </article>
+
+    <!-- Article 9 -->
+    <article class="article-card" data-category="Techniek">
+      <div class="card-img">
+        <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop" alt="LLM workflows">
+        <div class="card-img-overlay"></div>
+        <div class="card-cat">Techniek</div>
+      </div>
+      <div class="card-body">
+        <h4><a href="#">LLM's inzetten in bedrijfsprocessen: mogelijkheden, beperkingen en veiligheid</a></h4>
+        <p>Wanneer voeg je een taalmodel toe aan een workflow, en wanneer is een deterministisch systeem beter? Eerlijk antwoord.</p>
+      </div>
+      <div class="card-footer">
+        <div class="card-author">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=faces&auto=format" alt="Thomas">
+          <span>Thomas Brouwer</span>
+        </div>
+        <div class="reading-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          12 min
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter-section">
+  <div class="newsletter-card">
+    <div class="label" style="justify-content:center">Nieuwsbrief</div>
+    <h2>Blijf voorop lopen</h2>
+    <p>Ontvang elke twee weken de beste automation insights direct in je inbox. Geen spam, alleen waarde.</p>
+    <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+      <input type="email" id="nlEmail" placeholder="jouw@email.nl" required>
+      <button type="submit" class="btn-primary">Inschrijven</button>
+    </form>
+    <p class="newsletter-note" id="nlMsg"></p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2026 Nemoclaw Consultants — Alle rechten voorbehouden</span>
+  <div style="display:flex;gap:24px">
+    <a href="index.html">Home</a>
+    <a href="marketplace.html">Marketplace</a>
+    <a href="pricing.html">Prijzen</a>
+    <a href="blog.html">Kennisbank</a>
+  </div>
+</footer>
+
+<script>
+  // ── FILTER BY CATEGORY ──
+  function filterCategory(cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const btns = document.querySelectorAll('.filter-btn');
+    btns.forEach(b => { if (b.textContent === cat || (cat === 'Alle' && b.textContent === 'Alle')) b.classList.add('active'); });
+
+    const cards = document.querySelectorAll('.article-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = cat === 'Alle' || card.dataset.category === cat;
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    document.querySelector('.section-header span').textContent = visible + ' artikel' + (visible !== 1 ? 'en' : '');
+
+    document.getElementById('searchInput').value = '';
+  }
+
+  // ── SEARCH ──
+  function searchArticles(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.filter-btn').classList.add('active');
+
+    const cards = document.querySelectorAll('.article-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    document.querySelector('.section-header span').textContent = visible + ' artikel' + (visible !== 1 ? 'en' : '');
+  }
+
+  // ── NEWSLETTER ──
+  function subscribeNewsletter(e) {
+    e.preventDefault();
+    const email = document.getElementById('nlEmail').value;
+    const msg = document.getElementById('nlMsg');
+    msg.style.color = '#22C55E';
+    msg.textContent = '✓ Bedankt! Je ontvangt een bevestiging op ' + email;
+    document.getElementById('nlEmail').value = '';
+  }
+</script>
+</body>
+</html>
