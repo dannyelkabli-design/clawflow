@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nemoclaw Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0A0C12;
+  --surface: #12141C;
+  --surface2: #1A1D28;
+  --border: rgba(255,255,255,0.07);
+  --accent: #E8501E;
+  --purple: #7B3FC4;
+  --gradient: linear-gradient(135deg, #7B3FC4, #E8501E);
+  --text: #E8EAF0;
+  --muted: #7A7E8E;
+  --green: #22C55E;
+  --yellow: #F59E0B;
+  --red: #EF4444;
+  --blue: #3B82F6;
+}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', system-ui, sans-serif; min-height: 100vh; }
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── LOGIN ── */
+#login-screen {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 30% 40%, rgba(123,63,196,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 60%, rgba(232,80,30,0.1) 0%, transparent 60%), var(--bg);
+}
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 100%; max-width: 400px;
+  text-align: center;
+}
+.login-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 32px; }
+.login-logo-icon {
+  width: 40px; height: 40px;
+  background: var(--gradient);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+}
+.login-logo-icon svg { width: 22px; height: 22px; }
+.login-logo-text { font-weight: 600; font-size: 18px; }
+.login-logo-text span { display: block; font-size: 11px; color: var(--muted); font-weight: 400; letter-spacing: 1px; text-transform: uppercase; }
+.login-card h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.login-card p { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+.form-group { margin-bottom: 16px; text-align: left; }
+.form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.form-group input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color .2s;
+}
+.form-group input:focus { outline: none; border-color: var(--purple); }
+.login-btn {
+  width: 100%; padding: 13px;
+  background: var(--gradient);
+  border: none; border-radius: 8px;
+  color: #fff; font-size: 14px; font-weight: 600;
+  cursor: pointer; margin-top: 8px;
+  transition: opacity .2s;
+}
+.login-btn:hover { opacity: .9; }
+.login-error { color: var(--red); font-size: 13px; margin-top: 12px; display: none; }
+
+/* ── LAYOUT ── */
+#admin-app { display: none; min-height: 100vh; }
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 100;
+}
+.sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px;
+  background: var(--gradient);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.sidebar-logo-icon svg { width: 18px; height: 18px; }
+.sidebar-logo-text { font-weight: 600; font-size: 14px; line-height: 1.2; }
+.sidebar-logo-text span { display: block; font-size: 10px; color: var(--muted); font-weight: 400; letter-spacing: .8px; text-transform: uppercase; }
+nav.sidebar-nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
+.nav-section-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 12px 12px 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px; font-weight: 500;
+  transition: all .15s;
+  user-select: none;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(123,63,196,0.15); color: var(--text); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 10px;
+}
+.sidebar-footer {
+  padding: 12px 8px;
+  border-top: 1px solid var(--border);
+}
+.logout-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 12px;
+  border-radius: 7px; border: none;
+  background: transparent; color: var(--muted);
+  font-size: 13px; cursor: pointer;
+  transition: all .15s;
+}
+.logout-btn:hover { background: rgba(239,68,68,0.1); color: var(--red); }
+.logout-btn svg { width: 16px; height: 16px; }
+
+.main-content {
+  margin-left: 220px;
+  min-height: 100vh;
+  padding: 32px;
+}
+.page { display: none; }
+.page.active { display: block; }
+
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 24px; font-weight: 600; }
+.page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+/* ── STAT CARDS ── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.stat-value { font-size: 28px; font-weight: 700; margin: 6px 0 2px; }
+.stat-sub { font-size: 12px; color: var(--muted); }
+.stat-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.stat-icon svg { width: 18px; height: 18px; }
+.stat-icon.purple { background: rgba(123,63,196,0.15); color: var(--purple); }
+.stat-icon.orange { background: rgba(232,80,30,0.15); color: var(--accent); }
+.stat-icon.green { background: rgba(34,197,94,0.15); color: var(--green); }
+.stat-icon.blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+/* ── TABLES ── */
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.table-card-header h2 { font-size: 15px; font-weight: 600; }
+.table-actions { display: flex; gap: 8px; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 10px 16px;
+  font-size: 11px; font-weight: 600;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+  background: var(--surface2);
+  text-align: left; border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px; border-radius: 5px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px;
+}
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-purple { background: rgba(123,63,196,0.15); color: var(--purple); }
+.badge-orange { background: rgba(232,80,30,0.15); color: var(--accent); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 7px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  border: none; transition: all .15s;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary { background: var(--gradient); color: #fff; }
+.btn-primary:hover { opacity: .9; }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.2); }
+.btn-danger { background: rgba(239,68,68,0.1); color: var(--red); }
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+.btn-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.btn-green:hover { background: rgba(34,197,94,0.25); }
+
+/* ── MATURITY BAR ── */
+.maturity-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.maturity-bar { height: 6px; border-radius: 3px; background: var(--surface2); width: 80px; overflow: hidden; }
+.maturity-bar-fill { height: 100%; border-radius: 3px; background: var(--gradient); }
+.maturity-val { font-size: 12px; font-weight: 600; color: var(--muted); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%; max-width: 640px;
+  max-height: 90vh; overflow-y: auto;
+  position: relative;
+}
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.modal-header h2 { font-size: 17px; font-weight: 600; }
+.modal-close {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; padding: 4px;
+  transition: color .15s;
+}
+.modal-close:hover { color: var(--text); }
+.modal-close svg { width: 18px; height: 18px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.detail-block { background: var(--surface2); border-radius: 8px; padding: 12px; }
+.detail-block label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+.detail-block p { font-size: 13px; font-weight: 500; }
+.answers-list { background: var(--surface2); border-radius: 8px; padding: 12px; }
+.answers-list h3 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+.answer-item { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.answer-item:last-child { border-bottom: none; }
+.answer-q { color: var(--muted); margin-bottom: 2px; }
+.answer-a { font-weight: 500; }
+
+/* ── SEARCH + FILTER ── */
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.search-input {
+  flex: 1; min-width: 200px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text); font-size: 13px;
+}
+.search-input:focus { outline: none; border-color: var(--purple); }
+.filter-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text); font-size: 13px;
+  cursor: pointer;
+}
+.filter-select:focus { outline: none; }
+
+/* ── ACTIVITY FEED ── */
+.activity-list { padding: 0 4px; }
+.activity-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.activity-dot.green { background: var(--green); }
+.activity-dot.orange { background: var(--accent); }
+.activity-dot.purple { background: var(--purple); }
+.activity-body p { font-size: 13px; }
+.activity-body time { font-size: 11px; color: var(--muted); }
+
+/* ── SETTINGS ── */
+.settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+.settings-section h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.settings-row:last-child { border-bottom: none; }
+.settings-row-info p { font-size: 13px; font-weight: 500; }
+.settings-row-info span { font-size: 12px; color: var(--muted); }
+.settings-input {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 8px 12px;
+  color: var(--text); font-size: 13px; width: 260px;
+}
+.settings-input:focus { outline: none; border-color: var(--purple); }
+.save-btn {
+  background: var(--gradient); border: none;
+  border-radius: 7px; padding: 8px 16px;
+  color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+
+/* ── CONSULTANT CARD ── */
+.consultant-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.consultant-info p { font-size: 13px; font-weight: 500; }
+.consultant-info span { font-size: 11px; color: var(--muted); }
+.tag-list { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 11px; color: var(--muted); }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
+.empty-state svg { width: 40px; height: 40px; margin: 0 auto 12px; opacity: .4; }
+.empty-state p { font-size: 14px; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  z-index: 9999;
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s;
+  max-width: 320px;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.success { border-color: var(--green); color: var(--green); }
+#toast.error { border-color: var(--red); color: var(--red); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { width: 56px; }
+  .sidebar-logo-text, .nav-item span, .nav-badge, .sidebar-logo-text, .logout-btn span { display: none; }
+  .nav-section-label { display: none; }
+  .main-content { margin-left: 56px; padding: 20px 16px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke-linecap="round"><line x1="4" y1="16" x2="8" y2="6" stroke="white" stroke-width="1.5"/><circle cx="8" cy="6" r="2.2" stroke="white" stroke-width="1.5" fill="none"/><line x1="4" y1="16" x2="14" y2="10" stroke="white" stroke-width="1.5"/><circle cx="14" cy="10" r="2.2" stroke="white" stroke-width="1.5" fill="none"/><line x1="4" y1="16" x2="17" y2="16" stroke="white" stroke-width="1.5"/><circle cx="17" cy="16" r="2.2" stroke="white" stroke-width="1.5" fill="none"/><circle cx="4" cy="16" r="2.2" fill="white"/></svg>
+      </div>
+      <div class="login-logo-text">Nemoclaw<span>Admin Panel</span></div>
+    </div>
+    <h1>Welkom terug</h1>
+    <p>Log in om het dashboard te bekijken</p>
+    <div class="form-group">
+      <label>E-mailadres</label>
+      <input type="email" id="login-email" placeholder="admin@nemoclaw.nl" />
+    </div>
+    <div class="form-group">
+      <label>Wachtwoord</label>
+      <input type="password" id="login-pass" placeholder="••••••••" />
+    </div>
+    <button class="login-btn" onclick="doLogin()">Inloggen</button>
+    <p class="login-error" id="login-error">Verkeerd wachtwoord. Probeer opnieuw.</p>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke-linecap="round"><line x1="4" y1="16" x2="8" y2="6" stroke="white" stroke-width="1.5"/><circle cx="8" cy="6" r="2.2" stroke="white" stroke-width="1.5" fill="none"/><line x1="4" y1="16" x2="14" y2="10" stroke="white" stroke-width="1.5"/><circle cx="14" cy="10" r="2.2" stroke="white" stroke-width="1.5" fill="none"/><line x1="4" y1="16" x2="17" y2="16" stroke="white" stroke-width="1.5"/><circle cx="17" cy="16" r="2.2" stroke="white" stroke-width="1.5" fill="none"/><circle cx="4" cy="16" r="2.2" fill="white"/></svg>
+      </div>
+      <div class="sidebar-logo-text">Nemoclaw<span>Admin</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overzicht</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-section-label">Scans & Leads</div>
+      <div class="nav-item" onclick="showPage('scans')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Process Scans</span>
+        <span class="nav-badge" id="badge-scans">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('leads')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Leads & E-mails</span>
+        <span class="nav-badge" id="badge-leads" style="display:none">0</span>
+      </div>
+      <div class="nav-section-label">Marketplace</div>
+      <div class="nav-item" onclick="showPage('consultants')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Consultants</span>
+      </div>
+      <div class="nav-item" onclick="showPage('opdrachten')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        <span>Opdrachten</span>
+      </div>
+      <div class="nav-section-label">Systeem</div>
+      <div class="nav-item" onclick="showPage('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Instellingen</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Uitloggen</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Overzicht van alle activiteit — <span id="dash-date"></span></p>
+      </div>
+      <div class="stats-grid" id="dash-stats">
+        <div class="stat-card">
+          <div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+          <div class="stat-label">Totaal scans</div>
+          <div class="stat-value" id="stat-total">—</div>
+          <div class="stat-sub">Betaalde scans</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="stat-label">Wachtend PDF</div>
+          <div class="stat-value" id="stat-pending">—</div>
+          <div class="stat-sub">Nog te versturen</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="stat-label">Verzonden PDF</div>
+          <div class="stat-value" id="stat-sent">—</div>
+          <div class="stat-sub">Klanten bediend</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="stat-label">Omzet</div>
+          <div class="stat-value" id="stat-revenue">—</div>
+          <div class="stat-sub">97 per scan</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:20px">
+        <div class="table-card">
+          <div class="table-card-header">
+            <h2>Recente scans</h2>
+            <button class="btn btn-ghost" onclick="showPage('scans')">Alle scans →</button>
+          </div>
+          <table>
+            <thead><tr><th>Bedrijf</th><th>Email</th><th>Score</th><th>Status</th><th>Datum</th></tr></thead>
+            <tbody id="dash-recent-scans"><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px">Laden...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-card">
+          <div class="table-card-header"><h2>Activiteit</h2></div>
+          <div class="activity-list" id="activity-feed" style="padding:12px 16px">
+            <div style="color:var(--muted);font-size:13px;text-align:center;padding:24px">Laden...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCANS -->
+    <div class="page" id="page-scans">
+      <div class="page-header">
+        <h1>Process Scans</h1>
+        <p>Beheer alle ingediende process scans en verstuur PDF-rapporten</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Zoek op bedrijf of e-mail..." oninput="filterScans(this.value)" />
+        <select class="filter-select" onchange="filterScanStatus(this.value)">
+          <option value="">Alle scans</option>
+          <option value="pending">Wachtend</option>
+          <option value="sent">Verzonden</option>
+        </select>
+        <button class="btn btn-ghost" onclick="loadScans()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-5.96"/></svg>
+          Vernieuwen
+        </button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Bedrijf</th><th>E-mail</th><th>Maturity</th><th>ROI (min)</th><th>Risico</th><th>Status</th><th>Datum</th><th>Acties</th></tr></thead>
+          <tbody id="scans-tbody"><tr><td colspan="8" style="color:var(--muted);text-align:center;padding:32px">Laden...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LEADS -->
+    <div class="page" id="page-leads">
+      <div class="page-header">
+        <h1>Leads & E-mails</h1>
+        <p>Alle e-mailadressen die achtergelaten zijn via contactformulieren en downloads</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Zoek op e-mail of bedrijf..." oninput="filterLeads(this.value)" />
+        <select class="filter-select" onchange="filterLeadSource(this.value)">
+          <option value="">Alle bronnen</option>
+          <option value="scan">Process Scan</option>
+          <option value="contact">Contactformulier</option>
+          <option value="newsletter">Nieuwsbrief</option>
+          <option value="playbook">Playbook download</option>
+        </select>
+        <button class="btn btn-primary" onclick="exportLeads()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>E-mail</th><th>Naam / Bedrijf</th><th>Bron</th><th>Datum</th><th>Acties</th></tr></thead>
+          <tbody id="leads-tbody"><tr><td colspan="5" style="color:var(--muted);text-align:center;padding:32px">Laden...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CONSULTANTS -->
+    <div class="page" id="page-consultants">
+      <div class="page-header">
+        <h1>Consultants</h1>
+        <p>Beheer gecertificeerde consultants op het marketplace platform</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Zoek consultant..." oninput="filterConsultants(this.value)" />
+        <button class="btn btn-primary" onclick="openAddConsultant()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Consultant toevoegen
+        </button>
+        <button class="btn btn-ghost" onclick="loadConsultants()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-5.96"/></svg>
+          Vernieuwen
+        </button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Consultant</th><th>Rol</th><th>Locatie</th><th>Tarief</th><th>Tags</th><th>Status</th><th>Acties</th></tr></thead>
+          <tbody id="consultants-tbody"><tr><td colspan="7" style="color:var(--muted);text-align:center;padding:32px">Laden...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- OPDRACHTEN -->
+    <div class="page" id="page-opdrachten">
+      <div class="page-header">
+        <h1>Opdrachten</h1>
+        <p>Beheer uitstaande opdrachten en stel featured opdrachten in</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Zoek opdracht..." oninput="filterOpdrachten(this.value)" />
+        <button class="btn btn-ghost" onclick="loadOpdrachten()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-5.96"/></svg>
+          Vernieuwen
+        </button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Opdracht</th><th>Bedrijf</th><th>Sector</th><th>Budget</th><th>Looptijd</th><th>Featured</th><th>Acties</th></tr></thead>
+          <tbody id="opdrachten-tbody"><tr><td colspan="7" style="color:var(--muted);text-align:center;padding:32px">Laden...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <h1>Instellingen</h1>
+        <p>Configureer API-sleutels, wachtwoord en systeeminstellingen</p>
+      </div>
+      <div class="settings-section">
+        <h2>Supabase configuratie</h2>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>Supabase URL</p><span>Project URL vanuit dashboard</span></div>
+          <input class="settings-input" id="set-sb-url" placeholder="https://xxx.supabase.co" />
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>Anon Key</p><span>Publieke API sleutel</span></div>
+          <input class="settings-input" id="set-sb-key" placeholder="sb_publishable_..." />
+        </div>
+      </div>
+      <div class="settings-section">
+        <h2>EmailJS configuratie</h2>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>Public Key</p><span>EmailJS account key</span></div>
+          <input class="settings-input" id="set-ej-key" placeholder="4sM36dgq..." />
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>Service ID</p><span>EmailJS service</span></div>
+          <input class="settings-input" id="set-ej-svc" placeholder="service_..." />
+        </div>
+      </div>
+      <div class="settings-section">
+        <h2>Admin toegang</h2>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>Admin e-mail</p><span>Inlogadres</span></div>
+          <input class="settings-input" id="set-admin-email" placeholder="admin@nemoclaw.nl" />
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>Admin wachtwoord</p><span>Kies een sterk wachtwoord</span></div>
+          <input class="settings-input" type="password" id="set-admin-pass" placeholder="Nieuw wachtwoord" />
+        </div>
+        <div style="margin-top:16px;text-align:right">
+          <button class="save-btn" onclick="saveSettings()">Instellingen opslaan</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h2>Systeemstatus</h2>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>Supabase verbinding</p><span>Database connectie</span></div>
+          <span class="badge badge-green" id="status-supabase">Verbonden</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>EmailJS</p><span>E-mail service</span></div>
+          <span class="badge badge-green" id="status-emailjs">Actief</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info"><p>jsPDF</p><span>PDF generatie</span></div>
+          <span class="badge badge-green" id="status-pdf">Gereed</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /admin-app -->
+
+<!-- SCAN DETAIL MODAL -->
+<div class="modal-overlay" id="scan-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Scan detail</h2>
+      <button class="modal-close" onclick="closeModal('scan-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="detail-grid" id="modal-scores"></div>
+    <div class="answers-list" id="modal-answers" style="margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" id="modal-pdf-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        PDF genereren & versturen
+      </button>
+      <button class="btn btn-ghost" onclick="closeModal('scan-modal')">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CONSULTANT MODAL -->
+<div class="modal-overlay" id="consultant-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Consultant toevoegen</h2>
+      <button class="modal-close" onclick="closeModal('consultant-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Naam</label><input class="settings-input" style="width:100%" id="c-naam" placeholder="Jan de Vries" /></div>
+      <div class="form-group"><label>Rol</label><input class="settings-input" style="width:100%" id="c-rol" placeholder="OpenClaw Specialist" /></div>
+      <div class="form-group"><label>E-mail</label><input class="settings-input" style="width:100%" id="c-email" placeholder="jan@..." /></div>
+      <div class="form-group"><label>Locatie</label><input class="settings-input" style="width:100%" id="c-locatie" placeholder="Amsterdam, NL" /></div>
+      <div class="form-group"><label>Tarief (€/dag)</label><input class="settings-input" style="width:100%" id="c-tarief" placeholder="850" /></div>
+      <div class="form-group"><label>Beschikbaarheid</label><input class="settings-input" style="width:100%" id="c-beschikbaar" placeholder="Beschikbaar per direct" /></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Bio</label><textarea class="settings-input" style="width:100%;height:80px;resize:vertical" id="c-bio" placeholder="Korte beschrijving..."></textarea></div>
+      <div class="form-group"><label>Tags (komma gescheiden)</label><input class="settings-input" style="width:100%" id="c-tags" placeholder="OpenClaw, Finance, ERP" /></div>
+      <div class="form-group"><label>Foto URL</label><input class="settings-input" style="width:100%" id="c-foto" placeholder="https://..." /></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="saveConsultant()">Opslaan</button>
+      <button class="btn btn-ghost" onclick="closeModal('consultant-modal')">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──
+const ADMIN_EMAIL    = localStorage.getItem('nc_admin_email')    || 'admin@nemoclaw.nl';
+const ADMIN_PASS     = localStorage.getItem('nc_admin_pass')     || 'nemoclaw2024!';
+const SUPABASE_URL   = localStorage.getItem('nc_sb_url')         || 'https://yiwchcshynwaletuepom.supabase.co';
+const SUPABASE_KEY   = localStorage.getItem('nc_sb_key')         || 'sb_publishable_FzORD6CilxPNFK-HYMclvg_uO7k_uLV';
+const EMAILJS_KEY    = localStorage.getItem('nc_ej_key')         || '4sM36dgqB59lIgLOb';
+const EMAILJS_SVC    = localStorage.getItem('nc_ej_svc')         || 'service_ig9zfsr';
+
+// Init services
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+emailjs.init({ publicKey: EMAILJS_KEY });
+
+// ── AUTH ──
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const err   = document.getElementById('login-error');
+  const stored_email = localStorage.getItem('nc_admin_email') || 'admin@nemoclaw.nl';
+  const stored_pass  = localStorage.getItem('nc_admin_pass')  || 'nemoclaw2024!';
+  if (email === stored_email && pass === stored_pass) {
+    sessionStorage.setItem('nc_logged_in', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'block';
+    err.style.display = 'none';
+    init();
+  } else {
+    err.style.display = 'block';
+  }
+}
+function doLogout() {
+  sessionStorage.removeItem('nc_logged_in');
+  location.reload();
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+// Auto-login check
+if (sessionStorage.getItem('nc_logged_in') === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-app').style.display = 'block';
+  setTimeout(init, 0);
+}
+
+// ── NAVIGATION ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'scans') loadScans();
+  if (name === 'leads') loadLeads();
+  if (name === 'consultants') loadConsultants();
+  if (name === 'opdrachten') loadOpdrachten();
+  if (name === 'settings') loadSettings();
+}
+
+// ── INIT ──
+async function init() {
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('nl-NL', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  await Promise.all([loadDashboard(), loadScans()]);
+}
+
+// ── DASHBOARD ──
+let allScans = [];
+async function loadDashboard() {
+  const { data: scans } = await db.from('process_scans').select('*').order('created_at', { ascending: false });
+  allScans = scans || [];
+  const total   = allScans.length;
+  const pending = allScans.filter(s => !s.pdf_sent).length;
+  const sent    = allScans.filter(s => s.pdf_sent).length;
+  const revenue = total * 97;
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-sent').textContent    = sent;
+  document.getElementById('stat-revenue').textContent = '€' + revenue.toLocaleString('nl-NL');
+  document.getElementById('badge-scans').textContent  = pending;
+  if (pending > 0) document.getElementById('badge-scans').style.display = '';
+  else document.getElementById('badge-scans').style.display = 'none';
+
+  // Recent scans
+  const recent = allScans.slice(0, 5);
+  const tbody = document.getElementById('dash-recent-scans');
+  if (!recent.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px">Geen scans gevonden</td></tr>'; return; }
+  tbody.innerHTML = recent.map(s => {
+    const sc = s.scores || {};
+    const mat = sc.maturity || 0;
+    return `<tr>
+      <td><strong>${esc(s.bedrijf || '—')}</strong></td>
+      <td style="color:var(--muted)">${esc(s.email)}</td>
+      <td>
+        <div class="maturity-bar-wrap">
+          <div class="maturity-bar"><div class="maturity-bar-fill" style="width:${mat}%"></div></div>
+          <span class="maturity-val">${mat}</span>
+        </div>
+      </td>
+      <td><span class="badge ${s.pdf_sent ? 'badge-green' : 'badge-yellow'}">${s.pdf_sent ? 'Verzonden' : 'Wachtend'}</span></td>
+      <td style="color:var(--muted)">${fmtDate(s.created_at)}</td>
+    </tr>`;
+  }).join('');
+
+  // Activity
+  const feed = document.getElementById('activity-feed');
+  feed.innerHTML = allScans.slice(0, 8).map(s => `
+    <div class="activity-item">
+      <div class="activity-dot ${s.pdf_sent ? 'green' : 'orange'}"></div>
+      <div class="activity-body">
+        <p><strong>${esc(s.bedrijf || s.email)}</strong> — scan ${s.pdf_sent ? 'afgerond' : 'ingediend'}</p>
+        <time>${fmtDate(s.created_at)}</time>
+      </div>
+    </div>`).join('');
+}
+
+// ── SCANS ──
+let scansData = [];
+async function loadScans() {
+  const { data } = await db.from('process_scans').select('*').order('created_at', { ascending: false });
+  scansData = data || [];
+  renderScans(scansData);
+}
+function renderScans(list) {
+  const tbody = document.getElementById('scans-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><p>Geen scans gevonden</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(s => {
+    const sc = s.scores || {};
+    const mat = sc.maturity || 0;
+    const risico = sc.risico || '—';
+    const roi = sc.roi_min ? '€' + Number(sc.roi_min).toLocaleString('nl-NL') : '—';
+    const riskBadge = { 'Laag': 'badge-green', 'Middel': 'badge-yellow', 'Hoog': 'badge-red' }[risico] || 'badge-blue';
+    return `<tr>
+      <td><strong>${esc(s.bedrijf || '—')}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${esc(s.email)}</td>
+      <td>
+        <div class="maturity-bar-wrap">
+          <div class="maturity-bar"><div class="maturity-bar-fill" style="width:${mat}%"></div></div>
+          <span class="maturity-val">${mat}/100</span>
+        </div>
+      </td>
+      <td>${roi}</td>
+      <td><span class="badge ${riskBadge}">${risico}</span></td>
+      <td><span class="badge ${s.pdf_sent ? 'badge-green' : 'badge-yellow'}">${s.pdf_sent ? 'Verzonden' : 'Wachtend'}</span></td>
+      <td style="color:var(--muted);font-size:12px">${fmtDate(s.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost" onclick="showScanDetail('${s.id}')">Detail</button>
+          <button class="btn btn-primary" onclick="sendReport('${s.id}')" ${s.pdf_sent ? 'style="opacity:.5"' : ''}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            PDF
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterScans(q) {
+  const f = scansData.filter(s => (s.bedrijf||'').toLowerCase().includes(q.toLowerCase()) || s.email.toLowerCase().includes(q.toLowerCase()));
+  renderScans(f);
+}
+function filterScanStatus(v) {
+  if (!v) return renderScans(scansData);
+  const f = v === 'pending' ? scansData.filter(s => !s.pdf_sent) : scansData.filter(s => s.pdf_sent);
+  renderScans(f);
+}
+
+// ── SCAN DETAIL MODAL ──
+function showScanDetail(id) {
+  const s = scansData.find(x => x.id === id);
+  if (!s) return;
+  const sc = s.scores || {};
+  document.getElementById('modal-title').textContent = (s.bedrijf || s.email) + ' — Scan Detail';
+  document.getElementById('modal-scores').innerHTML = `
+    <div class="detail-block"><label>Maturity Score</label><p style="font-size:22px;font-weight:700">${sc.maturity || 0}/100</p></div>
+    <div class="detail-block"><label>Platform</label><p>${sc.platform || '—'}</p></div>
+    <div class="detail-block"><label>ROI Projectie</label><p>€${Number(sc.roi_min||0).toLocaleString('nl-NL')} – €${Number(sc.roi_max||0).toLocaleString('nl-NL')}</p></div>
+    <div class="detail-block"><label>Risico</label><p>${sc.risico || '—'}</p></div>
+    <div class="detail-block"><label>E-mail</label><p>${esc(s.email)}</p></div>
+    <div class="detail-block"><label>Datum</label><p>${fmtDate(s.created_at)}</p></div>
+  `;
+  const answers = s.answers || {};
+  const qLabels = {
+    sector:'Sector', company_size:'Bedrijfsgrootte', annual_revenue:'Jaaromzet',
+    processes_count:'Aantal processen', it_maturity:'IT-volwassenheid', existing_automation:'Bestaande automation',
+    api_available:'API beschikbaar', data_quality:'Datakwaliteit', it_capacity:'IT-capaciteit',
+    management_support:'Management support', urgency:'Urgentie', budget:'Budget',
+    uren_handmatig:'Uren handmatig werk/week', fout_percentage:'Foutpercentage',
+    proceskritiek:'Proceskriticiteit', medewerkers_weerstand:'Weerstand medewerkers',
+    compliance:'Compliance vereisten', sector_spec:'Sector specificatie',
+    top_process_1:'Top proces 1', top_process_2:'Top proces 2', top_process_3:'Top proces 3',
+    integraties:'Integraties', timeline:'Gewenste tijdlijn', outsource:'Voorkeur uitvoering'
+  };
+  document.getElementById('modal-answers').innerHTML = `
+    <h3>Antwoorden (${Object.keys(answers).length})</h3>
+    ${Object.entries(answers).map(([k,v]) => `
+      <div class="answer-item">
+        <div class="answer-q">${qLabels[k] || k}</div>
+        <div class="answer-a">${Array.isArray(v) ? v.join(', ') : v}</div>
+      </div>`).join('')}
+  `;
+  document.getElementById('modal-pdf-btn').onclick = () => { closeModal('scan-modal'); sendReport(id); };
+  document.getElementById('scan-modal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── PDF GENERATION ──
+async function sendReport(id) {
+  const s = scansData.find(x => x.id === id);
+  if (!s) return;
+  showToast('PDF wordt gegenereerd...', '');
+  try {
+    const doc = buildPDF(s);
+    doc.save(`Nemoclaw-Rapport-${(s.bedrijf||'scan').replace(/\s+/g,'-')}.pdf`);
+    // Send email
+    const sc = s.scores || {};
+    await emailjs.send(EMAILJS_SVC, 'template_88sl09u', {
+      to_email: s.email,
+      to_name: s.bedrijf || 'Klant',
+      subject: 'Uw Nemoclaw Process Scan Rapport',
+      message: buildEmailBody(s, sc),
+    });
+    await db.from('process_scans').update({ pdf_sent: true }).eq('id', id);
+    const scan = scansData.find(x => x.id === id);
+    if (scan) scan.pdf_sent = true;
+    renderScans(scansData);
+    showToast('PDF verstuurd naar ' + s.email, 'success');
+  } catch(e) {
+    showToast('Fout: ' + e.message, 'error');
+  }
+}
+
+function buildPDF(s) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const sc = s.scores || {};
+  const W = 210, H = 297;
+  const purple = [123, 63, 196], orange = [232, 80, 30], dark = [10, 12, 18], text = [232, 234, 240], muted = [122, 126, 142];
+
+  // ── PAGE 1: COVER ──
+  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
+  doc.setFillColor(20, 22, 35); doc.rect(0, 0, W, 60, 'F');
+  doc.setFontSize(9); doc.setTextColor(...muted);
+  doc.text('NEMOCLAW CONSULTANTS', 20, 20);
+  doc.setFontSize(22); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
+  doc.text('Process Scan', 20, 36);
+  doc.text('Rapport', 20, 48);
+  doc.setFontSize(10); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
+  doc.text((s.bedrijf || 'Uw organisatie') + ' · ' + new Date(s.created_at).toLocaleDateString('nl-NL'), 20, 58);
+
+  // Score block
+  doc.setFillColor(20, 22, 40); doc.roundedRect(20, 74, 170, 50, 4, 4, 'F');
+  doc.setFontSize(11); doc.setTextColor(...muted); doc.text('AUTOMATION MATURITY SCORE', 30, 86);
+  doc.setFontSize(36); doc.setTextColor(...purple); doc.setFont(undefined, 'bold');
+  doc.text(String(sc.maturity || 0), 30, 110);
+  doc.setFontSize(14); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
+  doc.text('/100', 58, 110);
+
+  // KPI row
+  const kpis = [
+    { label: 'ROI (jaar)', value: sc.roi_min ? '€' + Number(sc.roi_min).toLocaleString('nl-NL') : '—' },
+    { label: 'Platform', value: sc.platform || '—' },
+    { label: 'Risico', value: sc.risico || '—' },
+    { label: 'Tijdlijn', value: sc.tijdlijn || '—' },
+  ];
+  kpis.forEach((k, i) => {
+    const x = 20 + i * 44;
+    doc.setFillColor(25, 28, 42); doc.roundedRect(x, 134, 40, 26, 3, 3, 'F');
+    doc.setFontSize(7); doc.setTextColor(...muted); doc.text(k.label.toUpperCase(), x+4, 142);
+    doc.setFontSize(9); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
+    doc.text(k.value, x+4, 152);
+    doc.setFont(undefined, 'normal');
+  });
+
+  doc.setFontSize(8); doc.setTextColor(...muted);
+  doc.text('Dit rapport is vertrouwelijk en opgesteld voor ' + (s.bedrijf || s.email), 20, 275);
+  doc.text('© ' + new Date().getFullYear() + ' Nemoclaw Consultants — nemoclaw.nl', 20, 282);
+
+  // ── PAGE 2: EXECUTIVE SUMMARY ──
+  doc.addPage();
+  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
+  doc.setFontSize(16); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
+  doc.text('Executive Summary', 20, 28);
+  doc.setFillColor(...purple); doc.rect(20, 33, 40, 1.5, 'F');
+
+  doc.setFontSize(10); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
+  doc.text('Op basis van uw scan-antwoorden hebben wij uw organisatie geanalyseerd. Hieronder de', 20, 46);
+  doc.text('belangrijkste bevindingen en aanbevelingen.', 20, 53);
+
+  const ranked = sc.ranked || [];
+  if (ranked.length) {
+    doc.setFontSize(12); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
+    doc.text('Top automatiseringskansen', 20, 68);
+    doc.setFont(undefined, 'normal');
+    ranked.slice(0, 5).forEach((r, i) => {
+      const y = 78 + i * 18;
+      doc.setFillColor(20, 22, 35); doc.roundedRect(20, y, 170, 14, 3, 3, 'F');
+      doc.setFillColor(...purple); doc.roundedRect(20, y, 5, 14, 2, 2, 'F');
+      doc.setFontSize(9); doc.setTextColor(...text);
+      doc.text(r.naam || ('Proces ' + (i+1)), 30, y+9);
+      doc.setFontSize(8); doc.setTextColor(...muted);
+      doc.text('Besparing: ~€' + Number(r.besparing||0).toLocaleString('nl-NL') + '/jaar', 130, y+9);
+    });
+  }
+
+  // ── PAGE 3: ROI + ROADMAP ──
+  doc.addPage();
+  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
+  doc.setFontSize(16); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
+  doc.text('ROI Projectie & 90-Dagen Roadmap', 20, 28);
+  doc.setFillColor(...orange); doc.rect(20, 33, 40, 1.5, 'F');
+
+  doc.setFontSize(10); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
+  doc.text('Geschatte jaarlijkse besparing na implementatie:', 20, 46);
+  doc.setFontSize(22); doc.setTextColor(...orange); doc.setFont(undefined, 'bold');
+  doc.text('€' + Number(sc.roi_min||0).toLocaleString('nl-NL') + ' – €' + Number(sc.roi_max||0).toLocaleString('nl-NL'), 20, 62);
+
+  const phases = [
+    { label: 'Fase 1 · Discovery (dag 1–30)', items: ['Procesanalyse & stakeholder interviews','Quick wins identificeren','Technische haalbaarheid beoordelen','Projectplan opstellen'] },
+    { label: 'Fase 2 · Build (dag 31–60)', items: ['Prioriteit 1 proces automatiseren','Integraties bouwen & testen','Medewerkerstraining voorbereiden','KPI-dashboard inrichten'] },
+    { label: 'Fase 3 · Scale (dag 61–90)', items: ['Uitrol overige processen','Monitoring & optimalisatie','Handover documentatie','ROI meting & rapportage'] },
+  ];
+  phases.forEach((ph, i) => {
+    const y = 78 + i * 55;
+    doc.setFillColor(20, 22, 35); doc.roundedRect(20, y, 170, 48, 3, 3, 'F');
+    doc.setFontSize(9); doc.setTextColor(i === 0 ? ...purple : i === 1 ? ...orange : [34, 197, 94]);
+    doc.setFont(undefined, 'bold'); doc.text(ph.label, 28, y+10);
+    doc.setFont(undefined, 'normal'); doc.setTextColor(...text);
+    ph.items.forEach((item, j) => { doc.setFontSize(8); doc.text('• ' + item, 28, y + 18 + j * 8); });
+  });
+
+  // ── PAGE 4: PLATFORM + RECOMMENDATIONS ──
+  doc.addPage();
+  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
+  doc.setFontSize(16); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
+  doc.text('Platform & Aanbevelingen', 20, 28);
+  doc.setFillColor(...purple); doc.rect(20, 33, 40, 1.5, 'F');
+
+  doc.setFillColor(20, 22, 35); doc.roundedRect(20, 44, 170, 38, 3, 3, 'F');
+  doc.setFontSize(9); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
+  doc.text('AANBEVOLEN PLATFORM', 28, 54);
+  doc.setFontSize(18); doc.setTextColor(...purple); doc.setFont(undefined, 'bold');
+  doc.text(sc.platform || 'OpenClaw', 28, 68);
+  doc.setFontSize(8); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
+  doc.text('Op basis van uw sector, compliance-vereisten en technische infrastructuur.', 28, 76);
+
+  const recs = [
+    'Start met een pilot op uw hoogste ROI-proces voor snelle resultaten',
+    'Stel een intern automation team aan of werk met een gecertificeerde Nemoclaw partner',
+    'Documenteer al uw huidige processen voor aanvang van de implementatie',
+    'Plan change management sessies met direct betrokken teams',
+    'Stel realistische KPIs in: foutreductie, verwerkingstijd, kosten per transactie',
+  ];
+  doc.setFontSize(12); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
+  doc.text('Concrete aanbevelingen', 20, 96);
+  recs.forEach((r, i) => {
+    const y = 106 + i * 12;
+    doc.setFillColor(...purple); doc.circle(23, y-1.5, 1.5, 'F');
+    doc.setFontSize(9); doc.setTextColor(...text); doc.setFont(undefined, 'normal');
+    doc.text(r, 28, y);
+  });
+
+  // CTA
+  doc.setFillColor(...purple); doc.roundedRect(20, 182, 170, 40, 4, 4, 'F');
+  doc.setFontSize(13); doc.setTextColor(255,255,255); doc.setFont(undefined, 'bold');
+  doc.text('Klaar om te starten?', 30, 196);
+  doc.setFontSize(9); doc.setFont(undefined, 'normal');
+  doc.text('Plan een gratis strategiegesprek van 30 minuten met een Nemoclaw specialist.', 30, 205);
+  doc.text('www.nemoclaw.nl  ·  info@nemoclaw.nl', 30, 214);
+
+  return doc;
+}
+
+function buildEmailBody(s, sc) {
+  return `Beste ${s.bedrijf || 'klant'},
+
+Bijgesloten vindt u uw persoonlijke Process Scan Rapport van Nemoclaw Consultants.
+
+RESULTATEN SAMENVATTING
+───────────────────────
+• Automation Maturity Score: ${sc.maturity || 0}/100
+• Aanbevolen platform: ${sc.platform || '—'}
+• Geschatte ROI: €${Number(sc.roi_min||0).toLocaleString('nl-NL')} – €${Number(sc.roi_max||0).toLocaleString('nl-NL')} per jaar
+• Risiconiveau: ${sc.risico || '—'}
+• Tijdlijn: ${sc.tijdlijn || '—'}
+
+VOLGENDE STAP
+─────────────
+Plan een gratis strategiegesprek om uw topkansen te bespreken: www.nemoclaw.nl
+
+Met vriendelijke groet,
+Nemoclaw Consultants
+info@nemoclaw.nl`;
+}
+
+// ── LEADS ──
+let leadsData = [];
+async function loadLeads() {
+  // Pull emails from process_scans as leads source
+  const { data: scans } = await db.from('process_scans').select('email, bedrijf, created_at');
+  leadsData = (scans || []).map(s => ({ email: s.email, name: s.bedrijf || '', source: 'scan', created_at: s.created_at }));
+  renderLeads(leadsData);
+  if (leadsData.length > 0) {
+    document.getElementById('badge-leads').textContent = leadsData.length;
+    document.getElementById('badge-leads').style.display = '';
+  }
+}
+function renderLeads(list) {
+  const tbody = document.getElementById('leads-tbody');
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:32px">Geen leads gevonden</td></tr>`; return; }
+  tbody.innerHTML = list.map(l => `<tr>
+    <td>${esc(l.email)}</td>
+    <td style="color:var(--muted)">${esc(l.name || '—')}</td>
+    <td><span class="badge badge-purple">${l.source}</span></td>
+    <td style="color:var(--muted);font-size:12px">${fmtDate(l.created_at)}</td>
+    <td><a href="mailto:${esc(l.email)}" class="btn btn-ghost" style="text-decoration:none">E-mail</a></td>
+  </tr>`).join('');
+}
+function filterLeads(q) {
+  const f = leadsData.filter(l => l.email.toLowerCase().includes(q.toLowerCase()) || (l.name||'').toLowerCase().includes(q.toLowerCase()));
+  renderLeads(f);
+}
+function filterLeadSource(v) {
+  if (!v) return renderLeads(leadsData);
+  renderLeads(leadsData.filter(l => l.source === v));
+}
+function exportLeads() {
+  const rows = [['Email', 'Naam/Bedrijf', 'Bron', 'Datum']].concat(leadsData.map(l => [l.email, l.name, l.source, fmtDate(l.created_at)]));
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'nemoclaw-leads-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('CSV geëxporteerd', 'success');
+}
+
+// ── CONSULTANTS ──
+let consultantsData = [];
+async function loadConsultants() {
+  const { data } = await db.from('consultants').select('*').order('created_at', { ascending: false });
+  consultantsData = data || [];
+  renderConsultants(consultantsData);
+}
+function renderConsultants(list) {
+  const tbody = document.getElementById('consultants-tbody');
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:32px">Geen consultants</td></tr>`; return; }
+  tbody.innerHTML = list.map(c => `<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="${esc(c.foto||'https://ui-avatars.com/api/?name='+encodeURIComponent(c.naam)+'&background=7B3FC4&color=fff')}" class="consultant-avatar" onerror="this.src='https://ui-avatars.com/api/?background=7B3FC4&color=fff'" />
+        <div class="consultant-info"><p>${esc(c.naam)}</p><span>${esc(c.email||'')}</span></div>
+      </div>
+    </td>
+    <td style="color:var(--muted)">${esc(c.rol)}</td>
+    <td style="color:var(--muted)">${esc(c.locatie||'—')}</td>
+    <td>€${esc(c.tarief||'—')}/dag</td>
+    <td><div class="tag-list">${(c.tags||[]).slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></td>
+    <td><span class="badge ${c.verified ? 'badge-green' : 'badge-yellow'}">${c.verified ? 'Verified' : 'Pending'}</span></td>
+    <td>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-green" onclick="toggleVerify('${c.id}', ${!c.verified})">${c.verified ? 'Unverify' : 'Verify'}</button>
+        <button class="btn btn-danger" onclick="deleteConsultant('${c.id}')">Verwijder</button>
+      </div>
+    </td>
+  </tr>`).join('');
+}
+function filterConsultants(q) {
+  renderConsultants(consultantsData.filter(c => c.naam.toLowerCase().includes(q.toLowerCase()) || (c.rol||'').toLowerCase().includes(q.toLowerCase())));
+}
+async function toggleVerify(id, val) {
+  await db.from('consultants').update({ verified: val }).eq('id', id);
+  await loadConsultants();
+  showToast(val ? 'Consultant geverifieerd' : 'Verificatie verwijderd', 'success');
+}
+async function deleteConsultant(id) {
+  if (!confirm('Weet je zeker dat je deze consultant wilt verwijderen?')) return;
+  await db.from('consultants').delete().eq('id', id);
+  await loadConsultants();
+  showToast('Consultant verwijderd', 'success');
+}
+function openAddConsultant() { document.getElementById('consultant-modal').classList.add('open'); }
+async function saveConsultant() {
+  const obj = {
+    naam: document.getElementById('c-naam').value,
+    rol: document.getElementById('c-rol').value,
+    email: document.getElementById('c-email').value,
+    locatie: document.getElementById('c-locatie').value,
+    tarief: document.getElementById('c-tarief').value,
+    beschikbaar: document.getElementById('c-beschikbaar').value,
+    bio: document.getElementById('c-bio').value,
+    tags: document.getElementById('c-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    foto: document.getElementById('c-foto').value,
+    verified: false,
+  };
+  if (!obj.naam || !obj.rol) { showToast('Naam en rol zijn verplicht', 'error'); return; }
+  const { error } = await db.from('consultants').insert(obj);
+  if (error) { showToast('Fout: ' + error.message, 'error'); return; }
+  closeModal('consultant-modal');
+  await loadConsultants();
+  showToast('Consultant toegevoegd', 'success');
+}
+
+// ── OPDRACHTEN ──
+let opdrachtenData = [];
+async function loadOpdrachten() {
+  const { data } = await db.from('opdrachten').select('*').order('created_at', { ascending: false });
+  opdrachtenData = data || [];
+  renderOpdrachten(opdrachtenData);
+}
+function renderOpdrachten(list) {
+  const tbody = document.getElementById('opdrachten-tbody');
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:32px">Geen opdrachten</td></tr>`; return; }
+  tbody.innerHTML = list.map(o => `<tr>
+    <td><strong>${esc(o.titel)}</strong></td>
+    <td style="color:var(--muted)">${esc(o.bedrijf)}</td>
+    <td><span class="badge badge-blue">${esc(o.sector||'—')}</span></td>
+    <td>${esc(o.budget||'—')}</td>
+    <td style="color:var(--muted)">${esc(o.looptijd||'—')}</td>
+    <td>
+      <button class="btn ${o.featured ? 'btn-primary' : 'btn-ghost'}" onclick="toggleFeatured('${o.id}', ${!o.featured})">
+        ${o.featured ? '★ Featured' : '☆ Feature'}
+      </button>
+    </td>
+    <td><button class="btn btn-danger" onclick="deleteOpdracht('${o.id}')">Verwijder</button></td>
+  </tr>`).join('');
+}
+function filterOpdrachten(q) {
+  renderOpdrachten(opdrachtenData.filter(o => o.titel.toLowerCase().includes(q.toLowerCase()) || o.bedrijf.toLowerCase().includes(q.toLowerCase())));
+}
+async function toggleFeatured(id, val) {
+  await db.from('opdrachten').update({ featured: val }).eq('id', id);
+  await loadOpdrachten();
+  showToast(val ? 'Opdracht als featured gemarkeerd' : 'Featured verwijderd', 'success');
+}
+async function deleteOpdracht(id) {
+  if (!confirm('Weet je zeker dat je deze opdracht wilt verwijderen?')) return;
+  await db.from('opdrachten').delete().eq('id', id);
+  await loadOpdrachten();
+  showToast('Opdracht verwijderd', 'success');
+}
+
+// ── SETTINGS ──
+function loadSettings() {
+  document.getElementById('set-sb-url').value   = localStorage.getItem('nc_sb_url')        || SUPABASE_URL;
+  document.getElementById('set-sb-key').value   = localStorage.getItem('nc_sb_key')        || SUPABASE_KEY;
+  document.getElementById('set-ej-key').value   = localStorage.getItem('nc_ej_key')        || EMAILJS_KEY;
+  document.getElementById('set-ej-svc').value   = localStorage.getItem('nc_ej_svc')        || EMAILJS_SVC;
+  document.getElementById('set-admin-email').value = localStorage.getItem('nc_admin_email') || 'admin@nemoclaw.nl';
+}
+function saveSettings() {
+  localStorage.setItem('nc_sb_url',      document.getElementById('set-sb-url').value);
+  localStorage.setItem('nc_sb_key',      document.getElementById('set-sb-key').value);
+  localStorage.setItem('nc_ej_key',      document.getElementById('set-ej-key').value);
+  localStorage.setItem('nc_ej_svc',      document.getElementById('set-ej-svc').value);
+  localStorage.setItem('nc_admin_email', document.getElementById('set-admin-email').value);
+  const newPass = document.getElementById('set-admin-pass').value;
+  if (newPass) localStorage.setItem('nc_admin_pass', newPass);
+  showToast('Instellingen opgeslagen. Herlaad de pagina om toe te passen.', 'success');
+}
+
+// ── UTILS ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('nl-NL', {day:'2-digit',month:'short',year:'numeric'}) : '—'; }
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3500);
+}
+</script>
+</body>
+</html>
