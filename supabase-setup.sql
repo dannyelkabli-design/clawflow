@@ -55,10 +55,15 @@ CREATE TABLE IF NOT EXISTS opdrachten (
 ALTER TABLE consultants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE opdrachten  ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public_read_consultants"  ON consultants FOR SELECT USING (true);
+CREATE POLICY "public_read_consultants"   ON consultants FOR SELECT USING (true);
 CREATE POLICY "public_insert_consultants" ON consultants FOR INSERT WITH CHECK (true);
-CREATE POLICY "public_read_opdrachten"   ON opdrachten  FOR SELECT USING (true);
-CREATE POLICY "public_insert_opdrachten" ON opdrachten  FOR INSERT WITH CHECK (true);
+CREATE POLICY "public_update_consultants" ON consultants FOR UPDATE USING (true);
+CREATE POLICY "public_delete_consultants" ON consultants FOR DELETE USING (true);
+
+CREATE POLICY "public_read_opdrachten"    ON opdrachten  FOR SELECT USING (true);
+CREATE POLICY "public_insert_opdrachten"  ON opdrachten  FOR INSERT WITH CHECK (true);
+CREATE POLICY "public_update_opdrachten"  ON opdrachten  FOR UPDATE USING (true);
+CREATE POLICY "public_delete_opdrachten"  ON opdrachten  FOR DELETE USING (true);
 
 -- REALTIME (zet tabellen aan voor live updates)
 ALTER PUBLICATION supabase_realtime ADD TABLE consultants;
