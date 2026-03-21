@@ -3,6 +3,23 @@
 -- Plak dit in: Supabase Dashboard → SQL Editor → New query
 -- ============================================================
 
+-- PROCESS SCAN TABEL
+CREATE TABLE IF NOT EXISTS process_scans (
+  id          uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  email       text NOT NULL,
+  bedrijf     text,
+  answers     jsonb,
+  scores      jsonb,
+  pdf_sent    boolean DEFAULT false,
+  created_at  timestamptz DEFAULT now()
+);
+
+ALTER TABLE process_scans ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public_insert_scans" ON process_scans FOR INSERT WITH CHECK (true);
+CREATE POLICY "public_read_scans"   ON process_scans FOR SELECT USING (true);
+CREATE POLICY "public_update_scans" ON process_scans FOR UPDATE USING (true);
+-- ============================================================
+
 -- TABELLEN
 CREATE TABLE IF NOT EXISTS consultants (
   id          uuid DEFAULT gen_random_uuid() PRIMARY KEY,

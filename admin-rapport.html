@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Process Scan Rapporten</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --bg: #0A0C12; --surface: #0F1220; --surface2: #141828; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13); --text: #F0F4FA; --muted: #6B7A99; --muted2: #9AA4B8; --accent: #E8501E; --purple: #7B3FC4; --logo-gradient: linear-gradient(135deg, #7B3FC4, #E8501E); --green: #22C55E; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.admin-bar { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; }
+.admin-bar h1 { font-size: 18px; font-weight: 600; }
+.admin-bar span { font-size: 13px; color: var(--muted); }
+.main { max-width: 1100px; margin: 0 auto; padding: 40px; }
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 36px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+.stat-n { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--accent); }
+.stat-l { font-size: 13px; color: var(--muted2); margin-top: 4px; }
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.table-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.table-header h2 { font-size: 16px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px 20px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface2); border-bottom: 1px solid var(--border); }
+td { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted2); }
+tr:last-child td { border: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.badge { display: inline-flex; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+.badge-pending { background: rgba(245,158,11,0.12); color: #F59E0B; }
+.badge-sent { background: rgba(34,197,94,0.1); color: var(--green); }
+.badge-risk-low { background: rgba(34,197,94,0.1); color: var(--green); }
+.badge-risk-mid { background: rgba(245,158,11,0.1); color: #F59E0B; }
+.badge-risk-high { background: rgba(239,68,68,0.1); color: #EF4444; }
+.maturity-bar { height: 6px; background: var(--surface2); border-radius: 100px; width: 100px; overflow: hidden; }
+.maturity-fill { height: 100%; background: var(--logo-gradient); border-radius: 100px; }
+.action-btns { display: flex; gap: 8px; }
+.btn-sm { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: all .15s; white-space: nowrap; }
+.btn-pdf { background: rgba(123,63,196,0.15); color: var(--purple); }
+.btn-pdf:hover { background: rgba(123,63,196,0.25); }
+.btn-send { background: var(--accent); color: #fff; }
+.btn-send:hover { background: #FF6B3D; }
+.btn-sent-ok { background: rgba(34,197,94,0.1); color: var(--green); cursor: default; }
+.empty { text-align: center; padding: 60px; color: var(--muted); }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 36px; max-width: 560px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.modal h3 { font-family: 'DM Serif Display', serif; font-size: 24px; font-weight: 400; margin-bottom: 20px; }
+.modal-section { margin-bottom: 20px; }
+.modal-section h4 { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.answer-row { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.answer-row:last-child { border: none; }
+.answer-key { color: var(--muted2); flex-shrink: 0; max-width: 45%; }
+.answer-val { color: var(--text); text-align: right; }
+.modal-btns { display: flex; gap: 12px; margin-top: 24px; }
+.btn-modal-close { background: none; border: 1px solid var(--border2); color: var(--muted2); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
+.btn-modal-generate { background: var(--accent); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="admin-bar">
+  <h1>📊 Process Scan — Admin Dashboard</h1>
+  <span id="last-refresh">Laden…</span>
+</div>
+
+<div class="main">
+  <div class="stats-row" id="stats-row">
+    <div class="stat"><div class="stat-n" id="st-total">—</div><div class="stat-l">Totaal scans</div></div>
+    <div class="stat"><div class="stat-n" id="st-pending">—</div><div class="stat-l">Nog te versturen</div></div>
+    <div class="stat"><div class="stat-n" id="st-sent">—</div><div class="stat-l">Verstuurd</div></div>
+    <div class="stat"><div class="stat-n" id="st-revenue">—</div><div class="stat-l">Omzet (€97/scan)</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <h2>Ingediende scans</h2>
+      <button class="btn-sm btn-pdf" onclick="loadScans()" style="padding:9px 18px;font-size:13px;">↻ Vernieuwen</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Bedrijf / E-mail</th>
+          <th>Datum</th>
+          <th>Maturity</th>
+          <th>ROI Potentieel</th>
+          <th>Risico</th>
+          <th>Status</th>
+          <th>Acties</th>
+        </tr>
+      </thead>
+      <tbody id="scans-body">
+        <tr><td colspan="7" class="empty">Laden…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://yiwchcshynwaletuepom.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_FzORD6CilxPNFK-HYMclvg_uO7k_uLV';
+const EMAILJS_KEY  = '4sM36dgqB59lIgLOb';
+const EMAILJS_SVC  = 'service_ig9zfsr';
+// Stel hieronder jouw e-mailadres in voor de PDF-leveringstemplate
+const OWNER_EMAIL  = 'JOUW_EMAIL@nemoclaw.nl';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+emailjs.init(EMAILJS_KEY);
+
+let allScans = [];
+
+async function loadScans() {
+  document.getElementById('last-refresh').textContent = 'Laden…';
+  const { data, error } = await sb.from('process_scans').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); document.getElementById('scans-body').innerHTML = `<tr><td colspan="7" class="empty">Fout bij laden: ${error.message}</td></tr>`; return; }
+  allScans = data || [];
+  renderTable(allScans);
+  updateStats(allScans);
+  document.getElementById('last-refresh').textContent = 'Bijgewerkt: ' + new Date().toLocaleTimeString('nl');
+}
+
+function updateStats(scans) {
+  document.getElementById('st-total').textContent   = scans.length;
+  document.getElementById('st-pending').textContent = scans.filter(s => !s.pdf_sent).length;
+  document.getElementById('st-sent').textContent    = scans.filter(s => s.pdf_sent).length;
+  document.getElementById('st-revenue').textContent = '€ ' + (scans.length * 97).toLocaleString('nl');
+}
+
+function renderTable(scans) {
+  if (!scans.length) { document.getElementById('scans-body').innerHTML = `<tr><td colspan="7" class="empty">Nog geen scans ingediend.</td></tr>`; return; }
+  document.getElementById('scans-body').innerHTML = scans.map(s => {
+    const sc = s.scores || {};
+    const date = new Date(s.created_at).toLocaleDateString('nl', { day:'2-digit', month:'short', year:'numeric' });
+    const maturity = sc.maturity || 0;
+    const riskClass = sc.risico === 'Hoog' ? 'risk-high' : sc.risico === 'Gemiddeld' ? 'risk-mid' : 'risk-low';
+    const roi = sc.roi_min && sc.roi_max ? `€ ${(sc.roi_min/1000).toFixed(0)}k – € ${(sc.roi_max/1000).toFixed(0)}k` : '—';
+    const statusBadge = s.pdf_sent
+      ? `<span class="badge badge-sent">✓ Verstuurd</span>`
+      : `<span class="badge badge-pending">In behandeling</span>`;
+    const sendBtn = s.pdf_sent
+      ? `<button class="btn-sm btn-sent-ok" disabled>✓ Verstuurd</button>`
+      : `<button class="btn-sm btn-send" onclick="sendReport('${s.id}')">📧 Verstuur PDF</button>`;
+
+    return `<tr>
+      <td style="color:var(--text)">
+        <div style="font-weight:500">${s.bedrijf || '—'}</div>
+        <div style="font-size:12px;color:var(--muted)">${s.email}</div>
+      </td>
+      <td>${date}</td>
+      <td>
+        <div style="margin-bottom:6px;font-size:13px;color:var(--text)">${maturity}/100</div>
+        <div class="maturity-bar"><div class="maturity-fill" style="width:${maturity}%"></div></div>
+      </td>
+      <td style="color:var(--green);font-weight:600">${roi}/jaar</td>
+      <td><span class="badge badge-${riskClass}">${sc.risico || '—'}</span></td>
+      <td>${statusBadge}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-sm btn-pdf" onclick="showDetail('${s.id}')">👁 Details</button>
+          ${sendBtn}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function showDetail(id) {
+  const s = allScans.find(x => x.id === id);
+  if (!s) return;
+  const sc = s.scores || {};
+  const a  = s.answers || {};
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <h3>${s.bedrijf || 'Onbekend bedrijf'}</h3>
+    <div class="modal-section">
+      <h4>Scores</h4>
+      ${row('Maturity Score', sc.maturity + '/100')}
+      ${row('ROI Potentieel', '€ ' + (sc.roi_min||0).toLocaleString('nl') + ' – € ' + (sc.roi_max||0).toLocaleString('nl') + '/jaar')}
+      ${row('Platform aanbeveling', sc.platform)}
+      ${row('Risiconiveau', sc.risico)}
+      ${row('Aanbevolen tijdlijn', sc.tijdlijn)}
+      ${row('Top processen', (sc.ranked||[]).join(' → '))}
+    </div>
+    <div class="modal-section">
+      <h4>Antwoorden</h4>
+      ${Object.entries(a).map(([k,v]) => row(k, Array.isArray(v) ? v.join(', ') : v)).join('')}
+    </div>
+    <div class="modal-btns">
+      <button class="btn-modal-close" onclick="document.getElementById('detail-modal').classList.remove('open')">Sluiten</button>
+      <button class="btn-modal-generate" onclick="generateAndDownloadPDF('${id}')">⬇ PDF Genereren & Downloaden</button>
+    </div>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function row(k, v) {
+  return `<div class="answer-row"><span class="answer-key">${k}</span><span class="answer-val">${v || '—'}</span></div>`;
+}
+
+// ══════════════════════════════════════════
+// PDF GENERATIE
+// ══════════════════════════════════════════
+function generatePDF(scan) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const a  = scan.answers || {};
+  const sc = scan.scores  || {};
+  const W  = 210, M = 20;
+
+  const hexToRgb = h => { const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h); return r ? [parseInt(r[1],16), parseInt(r[2],16), parseInt(r[3],16)] : [0,0,0]; };
+  const [ar,ag,ab] = hexToRgb('#E8501E');
+  const [pr,pg,pb] = hexToRgb('#7B3FC4');
+
+  // ── COVER PAGE ──
+  doc.setFillColor(10, 12, 18);
+  doc.rect(0, 0, 210, 297, 'F');
+  doc.setFillColor(pr, pg, pb);
+  doc.rect(0, 0, 6, 297, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9); doc.setTextColor(ar, ag, ab);
+  doc.text('NEMOCLAW CONSULTANTS', M, 40);
+  doc.setFontSize(32); doc.setTextColor(240, 244, 250);
+  doc.text('Automatiserings', M, 72);
+  doc.text('Process Scan', M, 90);
+  doc.setFontSize(14); doc.setFont('helvetica', 'normal'); doc.setTextColor(154, 164, 184);
+  doc.text('Persoonlijke rapportage voor', M, 108);
+  doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(240, 244, 250);
+  doc.text(scan.bedrijf || 'Uw Organisatie', M, 122);
+  // Score block
+  doc.setFillColor(15, 18, 32);
+  doc.roundedRect(M, 145, W - M*2, 60, 6, 6, 'F');
+  doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.setTextColor(107, 122, 153);
+  doc.text('AUTOMATION MATURITY SCORE', M + 14, 162);
+  doc.setFontSize(40); doc.setFont('helvetica', 'bold'); doc.setTextColor(ar, ag, ab);
+  doc.text(String(sc.maturity || 0), M + 14, 186);
+  doc.setFontSize(20); doc.setTextColor(154, 164, 184);
+  doc.text('/ 100', M + 30 + (sc.maturity >= 100 ? 28 : sc.maturity >= 10 ? 22 : 14), 186);
+  doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.setTextColor(107, 122, 153);
+  doc.text('ROI POTENTIEEL', M + 80, 162);
+  doc.setFontSize(15); doc.setFont('helvetica', 'bold'); doc.setTextColor(34, 197, 94);
+  doc.text('€ ' + (sc.roi_min||0).toLocaleString('nl') + ' – ' + (sc.roi_max||0).toLocaleString('nl'), M + 80, 175);
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(107,122,153);
+  doc.text('per jaar', M + 80, 183);
+  doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.setTextColor(107,122,153);
+  doc.text('PLATFORM', M + 80, 196);
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(240,244,250);
+  doc.text(sc.platform || '—', M + 80, 205);
+  // Footer cover
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(107,122,153);
+  doc.text('Vertrouwelijk — Uitsluitend bestemd voor ' + (scan.email || ''), M, 280);
+  doc.text('© 2026 Nemoclaw Consultants', M, 287);
+
+  // ── PAGE 2: EXECUTIVE SUMMARY ──
+  doc.addPage();
+  doc.setFillColor(10,12,18); doc.rect(0,0,210,297,'F');
+  doc.setFillColor(pr,pg,pb); doc.rect(0,0,6,297,'F');
+  let y = 30;
+  const h2 = (txt, yy) => {
+    doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(240,244,250);
+    doc.text(txt, M, yy); return yy + 12;
+  };
+  const body = (txt, yy, clr) => {
+    doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(...(clr||[154,164,184]));
+    const lines = doc.splitTextToSize(txt, W - M*2);
+    doc.text(lines, M, yy); return yy + lines.length * 6 + 4;
+  };
+  const label = (txt, yy) => {
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(ar,ag,ab);
+    doc.text(txt.toUpperCase(), M, yy); return yy + 6;
+  };
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(ar,ag,ab);
+  doc.text('EXECUTIVE SUMMARY', M, y); y += 12;
+  y = h2('Samenvatting & Oordeel', y);
+  y += 4;
+
+  const maturityLabel = sc.maturity >= 70 ? 'Hoog' : sc.maturity >= 40 ? 'Gemiddeld' : 'Laag';
+  const summary = `Op basis van uw antwoorden heeft uw organisatie een Automation Maturity Score van ${sc.maturity}/100 (${maturityLabel}). ` +
+    `Uw automatiseringspotentieel wordt geschat op € ${(sc.roi_min||0).toLocaleString('nl')} tot € ${(sc.roi_max||0).toLocaleString('nl')} besparing per jaar. ` +
+    `Onze analyse wijst uit dat ${sc.platform} het meest passende platform is voor uw organisatie. ` +
+    `Het risicoprofiel van een automatiseringstraject is voor uw situatie ${sc.risico?.toLowerCase()}.`;
+  y = body(summary, y);
+  y += 10;
+
+  // KPI row
+  const kpis = [
+    ['Maturity Score', sc.maturity + '/100', [ar,ag,ab]],
+    ['ROI per jaar', '€ '+(sc.roi_max||0).toLocaleString('nl'), [34,197,94]],
+    ['Platform', sc.platform, [pr,pg,pb]],
+    ['Risico', sc.risico, sc.risico==='Hoog'?[239,68,68]:sc.risico==='Gemiddeld'?[245,158,11]:[34,197,94]]
+  ];
+  const kw = (W - M*2 - 12) / 4;
+  kpis.forEach(([lbl, val, clr], i) => {
+    const x = M + i*(kw+4);
+    doc.setFillColor(15,18,32); doc.roundedRect(x, y, kw, 28, 4, 4, 'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(107,122,153);
+    doc.text(lbl, x+6, y+9);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...clr);
+    doc.text(val||'—', x+6, y+21);
+  });
+  y += 38;
+
+  // ── PROCESS PRIORITEIT ──
+  y = label('TOP AANBEVOLEN PROCESSEN OM TE AUTOMATISEREN', y);
+  const ranked = sc.ranked || [];
+  ranked.forEach((p, i) => {
+    doc.setFillColor(15,18,32); doc.roundedRect(M, y, W-M*2, 14, 3, 3, 'F');
+    doc.setFillColor(ar,ag,ab); doc.roundedRect(M, y, 6, 14, 2, 2, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(240,244,250);
+    doc.text(`${i+1}.  ${p}`, M+12, y+9);
+    y += 18;
+  });
+  y += 6;
+
+  // ── PAGE 3: ROI & ROADMAP ──
+  doc.addPage();
+  doc.setFillColor(10,12,18); doc.rect(0,0,210,297,'F');
+  doc.setFillColor(pr,pg,pb); doc.rect(0,0,6,297,'F');
+  y = 30;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(ar,ag,ab);
+  doc.text('ROI PROJECTIE', M, y); y += 12;
+  y = h2('Financiële Impact', y); y += 4;
+
+  y = body(`Gebaseerd op uw huidige situatie en de geselecteerde processen schatten wij de jaarlijkse besparing na implementatie op € ${(sc.roi_min||0).toLocaleString('nl')} tot € ${(sc.roi_max||0).toLocaleString('nl')}. Deze projectie is gebaseerd op: het aantal handmatig bestede uren, het foutpercentage in uw processen, het automatiseringspercentage dat haalbaar is gegeven uw IT-volwassenheid (${sc.maturity}/100), en de gemiddelde branche-benchmarks uit onze projectdatabase.`, y);
+  y += 8;
+
+  y = label('JAARLIJKSE BESPARINGSCOMPONENTEN', y);
+  const comps = [
+    ['Tijdsbesparing medewerkers', Math.round((sc.roi_min||0)*0.65).toLocaleString('nl')],
+    ['Foutreductie & correctiekosten', Math.round((sc.roi_min||0)*0.20).toLocaleString('nl')],
+    ['Snelheidswinst (cashflow, SLA)', Math.round((sc.roi_min||0)*0.15).toLocaleString('nl')]
+  ];
+  comps.forEach(([lbl, val]) => {
+    doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(154,164,184);
+    doc.text(lbl, M, y);
+    doc.setFont('helvetica','bold'); doc.setTextColor(34,197,94);
+    doc.text('€ '+val+'/jaar', W-M-30, y, {align:'right'});
+    doc.setDrawColor(30,35,55); doc.line(M, y+3, W-M, y+3);
+    y += 12;
+  });
+  y += 10;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(ar,ag,ab);
+  doc.text('AANBEVOLEN AANPAK', M, y); y += 12;
+  y = h2('90-Dagenplan voor uw organisatie', y); y += 4;
+
+  const phases = [
+    ['Fase 1: Discovery (week 1–4)', 'Procesinventarisatie en data-audit. Selectie van eerste use case. Business case opstellen. Platform configureren.'],
+    ['Fase 2: Build (week 5–10)', 'Ontwerp en bouw van eerste workflow. Integraties realiseren. Paralleltest met huidige proces. Go-live eerste automatisering.'],
+    ['Fase 3: Scale (week 11–13)', 'Resultaten meten en rapporteren. Governance inrichten. Tweede use case plannen. Kennisoverdracht naar intern team.']
+  ];
+  phases.forEach(([title, desc]) => {
+    doc.setFillColor(15,18,32); doc.roundedRect(M, y, W-M*2, 22, 4, 4, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(240,244,250);
+    doc.text(title, M+8, y+9);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(154,164,184);
+    const lines = doc.splitTextToSize(desc, W-M*2-16);
+    doc.text(lines[0]||'', M+8, y+16);
+    y += 26;
+  });
+
+  // ── PAGE 4: PLATFORM & RISICO ──
+  doc.addPage();
+  doc.setFillColor(10,12,18); doc.rect(0,0,210,297,'F');
+  doc.setFillColor(pr,pg,pb); doc.rect(0,0,6,297,'F');
+  y = 30;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(ar,ag,ab);
+  doc.text('PLATFORMADVIES', M, y); y += 12;
+  y = h2('Ons platform­advies: ' + (sc.platform||'—'), y); y += 4;
+
+  const platTxt = sc.platform === 'Nemoclaw'
+    ? 'Op basis van uw sector, compliancevereisten en organisatieomvang adviseren wij Nemoclaw als primair platform. Nemoclaw biedt ingebouwde AVG-compliance, geavanceerd rechtenbeheer, volledige audit trails en native integratie met Nederlandse overheidssystemen. Dit past het beste bij uw profiel.'
+    : sc.platform === 'OpenClaw'
+    ? 'Op basis van uw situatie adviseren wij OpenClaw als startplatform. OpenClaw heeft een kortere implementatietijd, lagere initiële investering, en een uitgebreid connector-ecosysteem. Ideaal voor uw eerste automatiseringsproject.'
+    : 'Op basis van uw profiel komen zowel OpenClaw als Nemoclaw in aanmerking. Wij adviseren te starten met OpenClaw voor de snelle eerste wins, met Nemoclaw als enterprise-laag voor de complexere processen.';
+  y = body(platTxt, y); y += 10;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(ar,ag,ab);
+  doc.text('RISICOANALYSE', M, y); y += 12;
+  y = h2('Risiconiveau: ' + (sc.risico||'—'), y); y += 4;
+
+  const riskTxt = sc.risico === 'Hoog'
+    ? 'Uw profiel toont een hoger risicoprofiel. De voornaamste risicofactoren zijn: data-kwaliteit, change management en/of beschikbare IT-capaciteit. Wij adviseren deze risico\'s expliciet te adresseren in de discovery-fase voordat er gebouwd wordt.'
+    : sc.risico === 'Gemiddeld'
+    ? 'Uw profiel toont een gemiddeld risicoprofiel. Er zijn aandachtspunten die bewuste aanpak vereisen, maar er zijn geen fundamentele blokkades. Met de juiste begeleiding zijn deze beheersbaar.'
+    : 'Uw profiel toont een gunstig risicoprofiel. De randvoorwaarden voor een succesvolle implementatie zijn grotendeels aanwezig. Dit is een goede basis voor een vlot traject.';
+  y = body(riskTxt, y); y += 12;
+
+  // Aanbevelingen
+  y = label('CONCRETE AANBEVELINGEN', y);
+  const recs = [
+    'Start met een gecontroleerde pilot op één duidelijk afgebakend proces',
+    'Betrek uw IT-afdeling vroegtijdig — plan een architectuurgesprek in week 1',
+    'Voer een data-audit uit op uw bronsystemen vóór de bouwfase',
+    'Zorg voor management­commitment en communiceer proactief naar medewerkers',
+    'Stel meetbare succescriteria vast: doorlooptijd, foutpercentage, uren bespaard'
+  ];
+  recs.forEach((r, i) => {
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(154,164,184);
+    doc.text(`${i+1}.  ${r}`, M+4, y); y += 8;
+  });
+  y += 10;
+
+  // CTA
+  doc.setFillColor(15,18,32); doc.roundedRect(M, y, W-M*2, 36, 6, 6, 'F');
+  doc.setFillColor(ar,ag,ab); doc.roundedRect(M, y, W-M*2, 4, 2, 2, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(240,244,250);
+  doc.text('Klaar voor de volgende stap?', M+10, y+16);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(154,164,184);
+  doc.text('Plan een gratis strategiegesprek: nemoclaw.nl/contact | info@nemoclaw.nl', M+10, y+26);
+
+  // Footer
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(107,122,153);
+  doc.text(`© 2026 Nemoclaw Consultants  ·  Vertrouwelijk  ·  Opgesteld voor ${scan.email}`, M, 288);
+
+  return doc;
+}
+
+async function generateAndDownloadPDF(id) {
+  const scan = allScans.find(s => s.id === id);
+  if (!scan) return;
+  const doc = generatePDF(scan);
+  doc.save(`Nemoclaw_ProcessScan_${(scan.bedrijf||'rapport').replace(/\s/g,'_')}.pdf`);
+}
+
+async function sendReport(id) {
+  const scan = allScans.find(s => s.id === id);
+  if (!scan) return;
+
+  const btn = document.querySelector(`button[onclick="sendReport('${id}')"]`);
+  if (btn) { btn.innerHTML = '<span class="spinner"></span>'; btn.disabled = true; }
+
+  // Genereer PDF
+  const doc = generatePDF(scan);
+  const pdfDataUri = doc.output('datauristring');
+
+  // Stuur e-mail via EmailJS met rapportage-inhoud
+  const sc = scan.scores || {};
+  try {
+    await emailjs.send(EMAILJS_SVC, 'template_88sl09u', {
+      to_email: scan.email,
+      to_name: scan.bedrijf || 'Geachte relatie',
+      download_link: 'Bijgevoegd vindt u uw persoonlijke Process Scan rapportage.',
+      message: `Geachte ${scan.bedrijf || 'relatie'},\n\nHierbij ontvangt u uw persoonlijke Automatiserings Process Scan rapportage.\n\n` +
+        `Uw Automation Maturity Score: ${sc.maturity}/100\n` +
+        `ROI Potentieel: € ${(sc.roi_min||0).toLocaleString('nl')} – € ${(sc.roi_max||0).toLocaleString('nl')}/jaar\n` +
+        `Platform aanbeveling: ${sc.platform}\n` +
+        `Risiconiveau: ${sc.risico}\n\n` +
+        `Top aanbevolen processen:\n${(sc.ranked||[]).map((p,i)=>`${i+1}. ${p}`).join('\n')}\n\n` +
+        `De volledige rapportage met ROI-analyse, 90-dagenplan en platformadvies is bijgevoegd als PDF.\n\n` +
+        `Heeft u vragen of wilt u de volgende stap zetten? Reageer op deze e-mail of plan een gesprek via onze website.\n\n` +
+        `Met vriendelijke groet,\nHet Nemoclaw Consultants team`
+    });
+
+    // Download ook lokaal voor archief
+    doc.save(`Nemoclaw_ProcessScan_${(scan.bedrijf||'rapport').replace(/\s/g,'_')}.pdf`);
+
+    // Update Supabase
+    await sb.from('process_scans').update({ pdf_sent: true }).eq('id', id);
+
+    if (btn) { btn.className = 'btn-sm btn-sent-ok'; btn.textContent = '✓ Verstuurd'; btn.disabled = true; }
+    alert(`✓ Rapportage verstuurd naar ${scan.email}\nPDF ook gedownload voor uw archief.`);
+    loadScans();
+  } catch(e) {
+    console.error(e);
+    alert('Fout bij verzenden: ' + e.message);
+    if (btn) { btn.innerHTML = '📧 Verstuur PDF'; btn.disabled = false; }
+  }
+}
+
+loadScans();
+</script>
+</body>
+</html>
