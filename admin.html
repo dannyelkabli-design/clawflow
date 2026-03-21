@@ -519,6 +519,10 @@ tr:hover td { background: rgba(255,255,255,0.02); }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-5.96"/></svg>
           Vernieuwen
         </button>
+        <button class="btn btn-ghost" onclick="seedDemoScans()" style="border-color:rgba(123,63,196,0.4);color:#9B7FD4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Voorbeelddata laden
+        </button>
       </div>
       <div class="table-card">
         <table>
@@ -831,6 +835,118 @@ async function loadDashboard() {
 
 // ── SCANS ──
 let scansData = [];
+
+async function seedDemoScans() {
+  if (!confirm('3 fictieve bedrijven invoegen als voorbeelddata?')) return;
+  showToast('Voorbeelddata laden...', '');
+
+  const demo = [
+    {
+      email: 'a.vanderberg@rabobank.nl',
+      bedrijf: 'Rabobank',
+      answers: {
+        sector: 'Finance / Accountancy', medewerkers: '2.000+', erp: 'SAP',
+        it_volwassenheid: 'Gevorderd — goede systeemintegratie, enige automatisering',
+        uren_handmatig: 'Meer dan 100 uur',
+        processen: ['Factuurverwerking / AP–AR', 'Rapportage & data-aggregatie', 'Compliance / documentverwerking'],
+        transacties: 'Meer dan 10.000', foutfrequentie: 'Soms — 1 tot 3%',
+        doorlooptijd: '1 tot 3 werkdagen',
+        api_beschikbaar: 'Ja, uitgebreide API\'s beschikbaar',
+        bestaande_automation: 'Low-code platform (bijv. Power Automate, Zapier)',
+        datakwaliteit: 'Goed — weinig problemen', it_capaciteit: 'Matig — 1 tot 2 dagen per week',
+        compliance: ['AVG / GDPR', 'SOX / financiële audit'],
+        proceskritiek: 'Kritiek — verstoring raakt direct omzet of dienstverlening',
+        medewerker_draagvlak: 'Gemiddeld — neutraal, wel overtuiging nodig',
+        management_support: 'Ja — volledig management\u00adcommitment en budgetreservering',
+        gevolgen: ['Hoge operationele kosten', 'Lange doorlooptijden en slechte klantervaring'],
+        urgentie: 'Urgent — ik wil binnen 6 maanden starten',
+        reden_niet_gedaan: 'Te weinig prioriteit bij management',
+        roi_termijn: '6 tot 12 maanden',
+        budget: '€ 75.000 – € 200.000', doelstelling: 'Kostenreductie',
+        scope_ambitie: 'Ambitieus — brede digitale transformatie van meerdere afdelingen',
+        uitdaging: 'Technische integratie met legacy-systemen'
+      },
+      scores: { maturity: 72, roi_min: 185000, roi_max: 310000, platform: 'OpenClaw', risico: 'Middel', tijdlijn: '3–6 maanden',
+        ranked: [{naam:'AP-factuurverwerking',besparing:118000},{naam:'Reconciliatie & maandafsluiting',besparing:87000},{naam:'Compliance rapportage',besparing:62000}]
+      },
+      pdf_sent: false,
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      email: 'p.smits@gemeente-utrecht.nl',
+      bedrijf: 'Gemeente Utrecht',
+      answers: {
+        sector: 'Overheid / Publieke sector', medewerkers: '501 – 2.000', erp: 'Unit4',
+        it_volwassenheid: 'Gemiddeld — enkele systemen, beperkte automatisering',
+        uren_handmatig: '40 – 100 uur',
+        processen: ['Compliance / documentverwerking', 'HR-processen (onboarding, verlof, declaraties)', 'Inkoop & aanvragen'],
+        transacties: '500 – 2.000', foutfrequentie: 'Regelmatig — 3 tot 8%',
+        doorlooptijd: 'Meer dan 3 werkdagen',
+        api_beschikbaar: 'Ja, maar beperkte of verouderde API\'s',
+        bestaande_automation: 'Alleen macro\'s of scripts (Excel, VBA)',
+        datakwaliteit: 'Matig — regelmatig problemen', it_capaciteit: 'Beperkt — minder dan 1 dag per week',
+        compliance: ['AVG / GDPR', 'BIO (Baseline Informatiebeveiliging Overheid)'],
+        proceskritiek: 'Belangrijk — vertraging heeft merkbare impact',
+        medewerker_draagvlak: 'Laag — veel weerstand verwacht',
+        management_support: 'Gedeeltelijk — wel interesse, nog geen commitment',
+        gevolgen: ['Lange doorlooptijden en slechte klantervaring', 'Overbelasting en uitval van medewerkers', 'Compliance- en auditrisico\'s'],
+        urgentie: 'Matig urgent — liefst binnen 12 maanden',
+        reden_niet_gedaan: 'Weerstand vanuit de organisatie',
+        roi_termijn: '12 tot 24 maanden',
+        budget: '€ 30.000 – € 75.000', doelstelling: 'Compliance en audit-readiness',
+        scope_ambitie: 'Conservatief — één proces, bewijs leveren en evalueren',
+        uitdaging: 'Interne adoptie en change management'
+      },
+      scores: { maturity: 38, roi_min: 52000, roi_max: 94000, platform: 'Nemoclaw', risico: 'Hoog', tijdlijn: '6–12 maanden',
+        ranked: [{naam:'Vergunningsverwerking',besparing:38000},{naam:'Inkoop & aanvragen',besparing:29000},{naam:'HR-onboarding',besparing:18000}]
+      },
+      pdf_sent: true,
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      email: 'r.dejong@coolblue.nl',
+      bedrijf: 'Coolblue',
+      answers: {
+        sector: 'Retail / E-commerce', medewerkers: '501 – 2.000', erp: 'Anders / meerdere systemen',
+        it_volwassenheid: 'Geavanceerd — digitale organisatie, actief geautomatiseerd',
+        uren_handmatig: '40 – 100 uur',
+        processen: ['Klantenservice / e-mail afhandeling', 'Orderverwerking / logistiek', 'Rapportage & data-aggregatie'],
+        transacties: 'Meer dan 10.000', foutfrequentie: 'Zelden — minder dan 1%',
+        doorlooptijd: '1 uur tot 1 werkdag',
+        api_beschikbaar: 'Ja, uitgebreide API\'s beschikbaar',
+        bestaande_automation: 'Eigen custom automatiseringsoplossingen',
+        datakwaliteit: 'Uitstekend — gestandaardiseerd en compleet', it_capaciteit: 'Ruim voldoende interne capaciteit',
+        compliance: ['AVG / GDPR'],
+        proceskritiek: 'Kritiek — verstoring raakt direct omzet of dienstverlening',
+        medewerker_draagvlak: 'Hoog — medewerkers vragen zelf om automatisering',
+        management_support: 'Ja — volledig management\u00adcommitment en budgetreservering',
+        gevolgen: ['Hoge operationele kosten', 'Gemiste groeikansen door gebrek aan schaalbaarheid'],
+        urgentie: 'Zeer urgent — zo snel mogelijk beginnen',
+        reden_niet_gedaan: 'Onduidelijk waar te beginnen',
+        roi_termijn: '3 tot 6 maanden',
+        budget: '€ 30.000 – € 75.000', doelstelling: 'Schaalbaarheid — meer doen met hetzelfde team',
+        scope_ambitie: 'Gematigd — 2 tot 3 processen in de eerste fase',
+        uitdaging: 'Technische integratie met legacy-systemen'
+      },
+      scores: { maturity: 81, roi_min: 124000, roi_max: 198000, platform: 'OpenClaw', risico: 'Laag', tijdlijn: '1–3 maanden',
+        ranked: [{naam:'E-mail triage & routing',besparing:89000},{naam:'Orderverwerking automatisering',besparing:67000},{naam:'Retourverwerking',besparing:32000}]
+      },
+      pdf_sent: false,
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ];
+
+  try {
+    const { error } = await db.from('process_scans').insert(demo);
+    if (error) throw error;
+    await loadScans();
+    await loadDashboard();
+    showToast('3 voorbeeldbedrijven geladen', 'success');
+  } catch(e) {
+    showToast('Fout: ' + e.message, 'error');
+  }
+}
+
 async function loadScans() {
   const { data } = await db.from('process_scans').select('*').order('created_at', { ascending: false });
   scansData = data || [];
