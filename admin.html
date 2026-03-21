@@ -716,17 +716,18 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
 <script>
 // ── CONFIG ──
-const ADMIN_EMAIL    = localStorage.getItem('nc_admin_email')    || 'admin@nemoclaw.nl';
-const ADMIN_PASS     = localStorage.getItem('nc_admin_pass')     || 'nemoclaw2024!';
-const SUPABASE_URL   = localStorage.getItem('nc_sb_url')         || 'https://yiwchcshynwaletuepom.supabase.co';
-const SUPABASE_KEY   = localStorage.getItem('nc_sb_key')         || 'sb_publishable_FzORD6CilxPNFK-HYMclvg_uO7k_uLV';
-const EMAILJS_KEY    = localStorage.getItem('nc_ej_key')         || '4sM36dgqB59lIgLOb';
-const EMAILJS_SVC    = localStorage.getItem('nc_ej_svc')         || 'service_ig9zfsr';
+const SUPABASE_URL = localStorage.getItem('nc_sb_url')  || 'https://yiwchcshynwaletuepom.supabase.co';
+const SUPABASE_KEY = localStorage.getItem('nc_sb_key')  || 'sb_publishable_FzORD6CilxPNFK-HYMclvg_uO7k_uLV';
+const EMAILJS_KEY  = localStorage.getItem('nc_ej_key')  || '4sM36dgqB59lIgLOb';
+const EMAILJS_SVC  = localStorage.getItem('nc_ej_svc')  || 'service_ig9zfsr';
 
-// Init services
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-emailjs.init({ publicKey: EMAILJS_KEY });
+// Services — lazy init after login
+let db = null;
+
+function initServices() {
+  try { db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { console.warn('Supabase init:', e); }
+  try { emailjs.init({ publicKey: EMAILJS_KEY }); } catch(e) { console.warn('EmailJS init:', e); }
+}
 
 // ── AUTH ──
 function doLogin() {
@@ -740,6 +741,7 @@ function doLogin() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-app').style.display = 'block';
     err.style.display = 'none';
+    initServices();
     init();
   } else {
     err.style.display = 'block';
@@ -754,6 +756,7 @@ document.getElementById('login-pass').addEventListener('keydown', e => { if (e.k
 if (sessionStorage.getItem('nc_logged_in') === '1') {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-app').style.display = 'block';
+  initServices();
   setTimeout(init, 0);
 }
 
