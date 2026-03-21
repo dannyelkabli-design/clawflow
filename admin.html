@@ -953,142 +953,130 @@ function buildPDF(s) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const sc = s.scores || {};
   const W = 210, H = 297;
-  const purple = [123, 63, 196], orange = [232, 80, 30], dark = [10, 12, 18], text = [232, 234, 240], muted = [122, 126, 142];
 
-  // ── PAGE 1: COVER ──
-  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
-  doc.setFillColor(20, 22, 35); doc.rect(0, 0, W, 60, 'F');
-  doc.setFontSize(9); doc.setTextColor(...muted);
-  doc.text('NEMOCLAW CONSULTANTS', 20, 20);
-  doc.setFontSize(22); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
-  doc.text('Process Scan', 20, 36);
-  doc.text('Rapport', 20, 48);
-  doc.setFontSize(10); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
-  doc.text((s.bedrijf || 'Uw organisatie') + ' · ' + new Date(s.created_at).toLocaleDateString('nl-NL'), 20, 58);
+  const BG=[10,12,18],SURF=[18,20,30],SURF2=[26,30,46],BORDER=[38,42,62];
+  const PURPLE=[123,63,196],ORANGE=[232,80,30],GREEN=[34,197,94];
+  const WHITE=[255,255,255],TEXT=[232,234,240],MUTED=[130,138,165];
 
-  // Score block
-  doc.setFillColor(20, 22, 40); doc.roundedRect(20, 74, 170, 50, 4, 4, 'F');
-  doc.setFontSize(11); doc.setTextColor(...muted); doc.text('AUTOMATION MATURITY SCORE', 30, 86);
-  doc.setFontSize(36); doc.setTextColor(...purple); doc.setFont(undefined, 'bold');
-  doc.text(String(sc.maturity || 0), 30, 110);
-  doc.setFontSize(14); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
-  doc.text('/100', 58, 110);
+  function fill(x,y,w,h,col,r){doc.setFillColor(...col);r?doc.roundedRect(x,y,w,h,r,r,'F'):doc.rect(x,y,w,h,'F');}
+  function strk(x,y,w,h,col,lw,r){doc.setDrawColor(...col);doc.setLineWidth(lw||0.3);r?doc.roundedRect(x,y,w,h,r,r,'D'):doc.rect(x,y,w,h,'D');}
+  function t(str,x,y,size,col,bold,align){doc.setFontSize(size);doc.setTextColor(...col);doc.setFont('helvetica',bold?'bold':'normal');doc.text(String(str),x,y,{align:align||'left'});}
+  function gradBar(x,y,w,h){var steps=30;for(var i=0;i<steps;i++){var p=i/(steps-1);doc.setFillColor(Math.round(123+(232-123)*p),Math.round(63+(80-63)*p),Math.round(196+(30-196)*p));doc.rect(x+(w/steps)*i,y,w/steps+0.5,h,'F');}}
+  function logo(cx,cy,k){k=k||1;doc.setLineWidth(0.7*k);doc.setDrawColor(...PURPLE);doc.line(cx,cy,cx-7*k,cy-9*k);doc.line(cx,cy,cx+3*k,cy-11*k);doc.line(cx,cy,cx+11*k,cy);doc.setFillColor(...ORANGE);doc.circle(cx-7*k,cy-9*k,1.4*k,'F');doc.circle(cx+3*k,cy-11*k,1.4*k,'F');doc.circle(cx+11*k,cy,1.4*k,'F');doc.setFillColor(...WHITE);doc.circle(cx,cy,1.8*k,'F');}
+  function arc(cx,cy,radius,pct){doc.setDrawColor(...SURF2);doc.setLineWidth(4);doc.circle(cx,cy,radius,'D');for(var i=0;i<pct;i++){var t0=(-90+i/100*360)*Math.PI/180;var t1=(-90+(i+1)/100*360)*Math.PI/180;var p=i/100;doc.setDrawColor(Math.round(123+(232-123)*p),Math.round(63+(80-63)*p),Math.round(196+(30-196)*p));doc.setLineWidth(4.5);doc.line(cx+radius*Math.cos(t0),cy+radius*Math.sin(t0),cx+radius*Math.cos(t1),cy+radius*Math.sin(t1));}}
+  function header(title,pg){fill(0,0,W,H,BG);gradBar(0,0,5,H);fill(5,0,W-5,50,SURF);fill(5,50,W-5,1.5,ORANGE);logo(27,28,1.1);t('NEMOCLAW',45,22,13,WHITE,true);t('CONSULTANTS',45,30,7,ORANGE);t(s.bedrijf||s.email,W-12,22,8,MUTED,false,'right');t(pg+' / 04',W-12,32,8,MUTED,false,'right');t(title,W-12,42,10,TEXT,true,'right');fill(5,H-16,W-5,16,SURF);t('Nemoclaw Consultants  |  www.nemoclaw.nl  |  info@nemoclaw.nl',W/2,H-9,6.5,MUTED,false,'center');t('VERTROUWELIJK',12,H-9,6.5,[80,84,100]);t('Pagina '+pg+' van 4',W-12,H-9,6.5,MUTED,false,'right');}
 
-  // KPI row
-  const kpis = [
-    { label: 'ROI (jaar)', value: sc.roi_min ? '€' + Number(sc.roi_min).toLocaleString('nl-NL') : '—' },
-    { label: 'Platform', value: sc.platform || '—' },
-    { label: 'Risico', value: sc.risico || '—' },
-    { label: 'Tijdlijn', value: sc.tijdlijn || '—' },
+  var mat=sc.maturity||0,roiMin=sc.roi_min||0,roiMax=sc.roi_max||0;
+  var platform=sc.platform||'OpenClaw',risico=sc.risico||'Middel',tijdlijn=sc.tijdlijn||'3-6 maanden';
+  var ranked=sc.ranked||[];
+  var rCol=risico==='Laag'?GREEN:risico==='Hoog'?[230,60,60]:[245,158,11];
+  var mCol=mat>=75?GREEN:mat>=50?ORANGE:mat>=25?[245,158,11]:[220,60,60];
+  var mLbl=mat>=75?'Geavanceerd':mat>=50?'Gevorderd':mat>=25?'Gemiddeld':'Beginner';
+
+  /* ── PAGE 1 COVER ── */
+  header('Scan Rapport','01');
+  var cx=62,cy=138;
+  fill(cx-38,cy-42,76,84,SURF2,8);strk(cx-38,cy-42,76,84,BORDER,0.3,8);
+  arc(cx,cy,22,mat);
+  t(mat,cx,cy+5,28,WHITE,true,'center');
+  t('/100',cx,cy+14,8,MUTED,false,'center');
+  t('MATURITY SCORE',cx,cy-28,6.5,MUTED,false,'center');
+  fill(cx-14,cy+18,28,8,mCol,3);t(mLbl,cx,cy+24,7,WHITE,true,'center');
+
+  t('BEDRIJFSPROFIEL',118,68,6.5,ORANGE);
+  t(s.bedrijf||'Uw organisatie',118,77,13,WHITE,true);
+  t(new Date(s.created_at).toLocaleDateString('nl-NL',{day:'2-digit',month:'long',year:'numeric'}),118,86,8,MUTED);
+
+  var kpis=[
+    {lb:'ROI PROJECTIE / JAAR',vl:roiMin?'EUR '+Math.round(roiMin/1000)+'K - '+Math.round(roiMax/1000)+'K':'--',co:ORANGE},
+    {lb:'AANBEVOLEN PLATFORM',vl:platform,co:PURPLE},
+    {lb:'RISICONIVEAU',vl:risico,co:rCol},
+    {lb:'TIJDLIJN',vl:tijdlijn,co:[59,130,246]}
   ];
-  kpis.forEach((k, i) => {
-    const x = 20 + i * 44;
-    doc.setFillColor(25, 28, 42); doc.roundedRect(x, 134, 40, 26, 3, 3, 'F');
-    doc.setFontSize(7); doc.setTextColor(...muted); doc.text(k.label.toUpperCase(), x+4, 142);
-    doc.setFontSize(9); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
-    doc.text(k.value, x+4, 152);
-    doc.setFont(undefined, 'normal');
-  });
+  kpis.forEach(function(k,i){var ky=98+i*26;fill(114,ky,84,21,SURF,4);fill(114,ky,3,21,k.co,2);t(k.lb,120,ky+7,5.5,MUTED);t(k.vl,120,ky+15,9,WHITE,true);});
 
-  doc.setFontSize(8); doc.setTextColor(...muted);
-  doc.text('Dit rapport is vertrouwelijk en opgesteld voor ' + (s.bedrijf || s.email), 20, 275);
-  doc.text('© ' + new Date().getFullYear() + ' Nemoclaw Consultants — nemoclaw.nl', 20, 282);
+  fill(12,204,186,34,SURF,5);gradBar(12,204,186,2.5);
+  t('WAT ONTVANGT U?',20,215,6.5,ORANGE);
+  var dl=['Automation Maturity Score','ROI-projectie op maat','90-dagenplan','Platformaanbeveling','Concrete acties'];
+  dl.forEach(function(d,i){var col=i<3?20:110,row=i<3?i:i-3;doc.setFillColor(...GREEN);doc.circle(col+2,222+row*8,1.2,'F');t(d,col+6,223+row*8,7.5,TEXT);});
 
-  // ── PAGE 2: EXECUTIVE SUMMARY ──
-  doc.addPage();
-  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
-  doc.setFontSize(16); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
-  doc.text('Executive Summary', 20, 28);
-  doc.setFillColor(...purple); doc.rect(20, 33, 40, 1.5, 'F');
+  /* ── PAGE 2 SUMMARY ── */
+  doc.addPage();header('Executive Summary','02');
+  t('ANALYSE SAMENVATTING',14,64,6.5,PURPLE);t('Wat wij hebben gevonden',14,74,16,WHITE,true);
+  doc.setFontSize(8.5);doc.setTextColor(...MUTED);doc.setFont('helvetica','normal');
+  doc.text(doc.splitTextToSize('Op basis van uw 24 antwoorden heeft Nemoclaw een diepteanalyse uitgevoerd van uw automatiseringspotentieel en dit vergeleken met vergelijkbare organisaties in onze database.',184),14,83);
 
-  doc.setFontSize(10); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
-  doc.text('Op basis van uw scan-antwoorden hebben wij uw organisatie geanalyseerd. Hieronder de', 20, 46);
-  doc.text('belangrijkste bevindingen en aanbevelingen.', 20, 53);
-
-  const ranked = sc.ranked || [];
-  if (ranked.length) {
-    doc.setFontSize(12); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
-    doc.text('Top automatiseringskansen', 20, 68);
-    doc.setFont(undefined, 'normal');
-    ranked.slice(0, 5).forEach((r, i) => {
-      const y = 78 + i * 18;
-      doc.setFillColor(20, 22, 35); doc.roundedRect(20, y, 170, 14, 3, 3, 'F');
-      doc.setFillColor(...purple); doc.roundedRect(20, y, 5, 14, 2, 2, 'F');
-      doc.setFontSize(9); doc.setTextColor(...text);
-      doc.text(r.naam || ('Proces ' + (i+1)), 30, y+9);
-      doc.setFontSize(8); doc.setTextColor(...muted);
-      doc.text('Besparing: ~€' + Number(r.besparing||0).toLocaleString('nl-NL') + '/jaar', 130, y+9);
-    });
-  }
-
-  // ── PAGE 3: ROI + ROADMAP ──
-  doc.addPage();
-  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
-  doc.setFontSize(16); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
-  doc.text('ROI Projectie & 90-Dagen Roadmap', 20, 28);
-  doc.setFillColor(...orange); doc.rect(20, 33, 40, 1.5, 'F');
-
-  doc.setFontSize(10); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
-  doc.text('Geschatte jaarlijkse besparing na implementatie:', 20, 46);
-  doc.setFontSize(22); doc.setTextColor(...orange); doc.setFont(undefined, 'bold');
-  doc.text('€' + Number(sc.roi_min||0).toLocaleString('nl-NL') + ' – €' + Number(sc.roi_max||0).toLocaleString('nl-NL'), 20, 62);
-
-  const phases = [
-    { label: 'Fase 1 · Discovery (dag 1–30)', items: ['Procesanalyse & stakeholder interviews','Quick wins identificeren','Technische haalbaarheid beoordelen','Projectplan opstellen'] },
-    { label: 'Fase 2 · Build (dag 31–60)', items: ['Prioriteit 1 proces automatiseren','Integraties bouwen & testen','Medewerkerstraining voorbereiden','KPI-dashboard inrichten'] },
-    { label: 'Fase 3 · Scale (dag 61–90)', items: ['Uitrol overige processen','Monitoring & optimalisatie','Handover documentatie','ROI meting & rapportage'] },
+  var cards=[
+    {lb:'Automation Readiness',vl:mat>=50?'Klaar voor implementatie':'Voorbereiding nodig',co:mat>=50?GREEN:ORANGE},
+    {lb:'ROI Potentieel',vl:roiMin?'Hoog - EUR '+Math.round(roiMin/1000)+'K+/jaar':'In kaart te brengen',co:ORANGE},
+    {lb:'Platform Fit',vl:platform,co:PURPLE},
+    {lb:'Implementatierisico',vl:risico,co:rCol}
   ];
-  phases.forEach((ph, i) => {
-    const y = 78 + i * 55;
-    doc.setFillColor(20, 22, 35); doc.roundedRect(20, y, 170, 48, 3, 3, 'F');
-    const phColor = i === 0 ? purple : i === 1 ? orange : [34, 197, 94];
-    doc.setFontSize(9); doc.setTextColor(...phColor);
-    doc.setFont(undefined, 'bold'); doc.text(ph.label, 28, y+10);
-    doc.setFont(undefined, 'normal'); doc.setTextColor(...text);
-    ph.items.forEach((item, j) => { doc.setFontSize(8); doc.text('• ' + item, 28, y + 18 + j * 8); });
-  });
+  cards.forEach(function(c,i){var cx2=12+(i%2)*97,cy2=100+Math.floor(i/2)*28;fill(cx2,cy2,91,22,SURF,4);strk(cx2,cy2,91,22,BORDER,0.3,4);fill(cx2,cy2,3,22,c.co,2);t(c.lb,cx2+8,cy2+8,6.5,MUTED);t(c.vl,cx2+8,cy2+17,9,WHITE,true);});
 
-  // ── PAGE 4: PLATFORM + RECOMMENDATIONS ──
-  doc.addPage();
-  doc.setFillColor(...dark); doc.rect(0, 0, W, H, 'F');
-  doc.setFontSize(16); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
-  doc.text('Platform & Aanbevelingen', 20, 28);
-  doc.setFillColor(...purple); doc.rect(20, 33, 40, 1.5, 'F');
-
-  doc.setFillColor(20, 22, 35); doc.roundedRect(20, 44, 170, 38, 3, 3, 'F');
-  doc.setFontSize(9); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
-  doc.text('AANBEVOLEN PLATFORM', 28, 54);
-  doc.setFontSize(18); doc.setTextColor(...purple); doc.setFont(undefined, 'bold');
-  doc.text(sc.platform || 'OpenClaw', 28, 68);
-  doc.setFontSize(8); doc.setTextColor(...muted); doc.setFont(undefined, 'normal');
-  doc.text('Op basis van uw sector, compliance-vereisten en technische infrastructuur.', 28, 76);
-
-  const recs = [
-    'Start met een pilot op uw hoogste ROI-proces voor snelle resultaten',
-    'Stel een intern automation team aan of werk met een gecertificeerde Nemoclaw partner',
-    'Documenteer al uw huidige processen voor aanvang van de implementatie',
-    'Plan change management sessies met direct betrokken teams',
-    'Stel realistische KPIs in: foutreductie, verwerkingstijd, kosten per transactie',
+  t('TOP AUTOMATISERINGSKANSEN',14,166,6.5,ORANGE);t('Processen met het hoogste ROI-potentieel',14,175,14,WHITE,true);
+  var procs=ranked.length?ranked.slice(0,5):[
+    {naam:'Factuurverwerking & AP',besparing:Math.round(roiMax*0.38)},
+    {naam:'Rapportage & data-aggregatie',besparing:Math.round(roiMax*0.28)},
+    {naam:'Goedkeuringsflows (approvals)',besparing:Math.round(roiMax*0.19)},
+    {naam:'E-mail & communicatie',besparing:Math.round(roiMax*0.10)},
+    {naam:'HR-administratie',besparing:Math.round(roiMax*0.05)}
   ];
-  doc.setFontSize(12); doc.setTextColor(...text); doc.setFont(undefined, 'bold');
-  doc.text('Concrete aanbevelingen', 20, 96);
-  recs.forEach((r, i) => {
-    const y = 106 + i * 12;
-    doc.setFillColor(...purple); doc.circle(23, y-1.5, 1.5, 'F');
-    doc.setFontSize(9); doc.setTextColor(...text); doc.setFont(undefined, 'normal');
-    doc.text(r, 28, y);
-  });
+  var bCols=[ORANGE,PURPLE,[59,130,246],GREEN,[245,158,11]];
+  var maxB=procs[0].besparing||1;
+  procs.forEach(function(p,i){var py=183+i*17;fill(12,py,186,13,SURF,3);fill(12,py,8,13,bCols[i],2);t(i+1,16,py+9,7.5,WHITE,true,'center');t(p.naam||('Proces '+(i+1)),24,py+9,8,WHITE,true);fill(110,py+3,60,7,SURF2,3);var bw=Math.max(Math.round((p.besparing/maxB)*60),3);fill(110,py+3,bw,7,bCols[i],3);t('EUR '+Number(p.besparing||0).toLocaleString('nl-NL'),196,py+9,7,ORANGE,true,'right');});
 
-  // CTA
-  doc.setFillColor(...purple); doc.roundedRect(20, 182, 170, 40, 4, 4, 'F');
-  doc.setFontSize(13); doc.setTextColor(255,255,255); doc.setFont(undefined, 'bold');
-  doc.text('Klaar om te starten?', 30, 196);
-  doc.setFontSize(9); doc.setFont(undefined, 'normal');
-  doc.text('Plan een gratis strategiegesprek van 30 minuten met een Nemoclaw specialist.', 30, 205);
-  doc.text('www.nemoclaw.nl  ·  info@nemoclaw.nl', 30, 214);
+  /* ── PAGE 3 ROI + ROADMAP ── */
+  doc.addPage();header('ROI & 90-Dagen Roadmap','03');
+  t('FINANCIELE IMPACT',14,64,6.5,ORANGE);t('Verwachte jaarlijkse besparing',14,74,16,WHITE,true);
+  fill(12,82,186,42,SURF,6);strk(12,82,186,42,BORDER,0.3,6);gradBar(12,82,186,2.5);
+  t('MINIMUM',30,95,6,MUTED);t('EUR '+Number(roiMin).toLocaleString('nl-NL'),30,109,19,WHITE,true);t('per jaar',30,117,7,MUTED);
+  doc.setDrawColor(...BORDER);doc.setLineWidth(0.4);doc.line(112,88,112,118);
+  t('MAXIMUM',122,95,6,MUTED);t('EUR '+Number(roiMax).toLocaleString('nl-NL'),122,109,19,ORANGE,true);t('per jaar',122,117,7,MUTED);
+  fill(12,126,186,10,SURF2,3);gradBar(12,126,186,10);
+  t('Terugverdientijd: '+tijdlijn,14,146,7.5,MUTED);
+
+  t('90-DAGEN IMPLEMENTATIE ROADMAP',14,160,6.5,PURPLE);t('Uw aanbevolen aanpak stap voor stap',14,169,14,WHITE,true);
+  var phases=[
+    {n:'1',title:'Discovery',period:'Dag 1-30',col:PURPLE,items:['Procesanalyse & interviews','Quick wins identificeren','Technische haalbaarheid','Projectplan & budget']},
+    {n:'2',title:'Build',period:'Dag 31-60',col:ORANGE,items:['Top-1 proces automatiseren','Integraties bouwen & testen','Medewerkerstraining','KPI-dashboard live']},
+    {n:'3',title:'Scale',period:'Dag 61-90',col:GREEN,items:['Uitrol overige processen','Monitoring & optimalisatie','Documentatie & handover','ROI-meting & rapportage']}
+  ];
+  phases.forEach(function(ph,i){var px=12+i*63;fill(px,178,59,92,SURF,5);strk(px,178,59,92,BORDER,0.3,5);fill(px,178,59,4,ph.col,3);doc.setFillColor(...ph.col);doc.circle(px+11,191,6,'F');t(ph.n,px+11,193.5,9,WHITE,true,'center');t(ph.title,px+21,189,10,WHITE,true);t(ph.period,px+21,197,6.5,MUTED);doc.setDrawColor(...BORDER);doc.setLineWidth(0.3);doc.line(px+4,202,px+55,202);ph.items.forEach(function(item,j){doc.setFillColor(...ph.col);doc.circle(px+8,209+j*13,1.3,'F');t(item,px+13,210+j*13,7,TEXT);});});
+
+  /* ── PAGE 4 PLATFORM + RECS ── */
+  doc.addPage();header('Platform & Aanbevelingen','04');
+  t('PLATFORM AANBEVELING',14,64,6.5,GREEN);t('Het optimale platform voor uw situatie',14,74,16,WHITE,true);
+  var isNemo=platform.toLowerCase().indexOf('nemo')>-1;
+  var platCol=isNemo?PURPLE:ORANGE;
+  var platDesc=isNemo?'Nemoclaw is gespecialiseerd in complexe overheids- en compliance-workflows met volledige audit trail.':'OpenClaw is ideaal voor finance, HR en operationele processen met snelle time-to-value.';
+  fill(12,82,186,46,SURF,6);strk(12,82,186,46,BORDER,0.3,6);gradBar(12,82,186,2.5);
+  fill(18,90,32,30,platCol,5);logo(34,105,0.9);
+  t(platform,58,97,16,WHITE,true);
+  doc.setFontSize(8);doc.setTextColor(...MUTED);doc.setFont('helvetica','normal');
+  doc.text(doc.splitTextToSize(platDesc,124),58,106);
+  doc.setFillColor(...GREEN);doc.circle(58,122,1.5,'F');
+  t('Gecertificeerde partners direct beschikbaar',62,123,7.5,GREEN,true);
+
+  t('CONCRETE AANBEVELINGEN',14,142,6.5,ORANGE);t('Uw persoonlijk actieplan',14,151,14,WHITE,true);
+  var recs=[
+    {ti:'Start met een pilot',bo:'Kies uw hoogste ROI-proces en start een bewezen pilot van 4-6 weken voor snelle zichtbare resultaten.'},
+    {ti:'Bouw intern eigenaarschap',bo:'Stel een automation lead aan die verantwoordelijkheid draagt voor continuiteit na de implementatie.'},
+    {ti:'Documenteer uw processen',bo:'Gedetailleerde process maps voor start versnelt de bouw gemiddeld met 40% en voorkomt scope creep.'},
+    {ti:'Plan change management',bo:'Betrek betrokken teams vroeg. Medewerkersdraagvlak is de nummer 1 succesfactor bij automatisering.'},
+    {ti:'Meet KPIs vanaf dag 1',bo:'Stel een baseline in voor foutpercentage, doorlooptijd en kosten per transactie voor de start.'}
+  ];
+  var recCols=[PURPLE,ORANGE,GREEN,[59,130,246],[245,158,11]];
+  recs.forEach(function(r,i){var ry=160+i*19;fill(12,ry,186,15,SURF,3);strk(12,ry,186,15,BORDER,0.3,3);fill(12,ry,9,15,recCols[i],2);t(i+1,16.5,ry+10,8,WHITE,true,'center');t(r.ti,25,ry+7,8,WHITE,true);t(r.bo,25,ry+13,6.5,MUTED);});
+
+  fill(12,258,186,28,PURPLE,6);gradBar(12,258,186,2.5);
+  t('Klaar om te starten?',W/2,270,13,WHITE,true,'center');
+  t('Plan uw gratis strategiegesprek van 30 minuten met een Nemoclaw specialist',W/2,278,8,[210,200,240],false,'center');
+  t('www.nemoclaw.nl  |  info@nemoclaw.nl',W/2,284,7.5,[180,170,220],false,'center');
 
   return doc;
 }
+
 
 function buildEmailBody(s, sc) {
   return `Beste ${s.bedrijf || 'klant'},
